@@ -1,8 +1,12 @@
 'use strict';
 
-const WASM_URL = 'app.wasm';
+const WASM_URL = 'build/app.wasm';
 
 var wasm;
+
+function main(){
+  var tbody = document.querySelector("tbody");
+}
 
 function initWasm() {
   const go = new Go();
@@ -23,10 +27,14 @@ function initWasm() {
   }
 }
 
-if (WebAssembly) {
-    document.addEventListener("DOMContentLoaded", function(){document.getElementById("notSupportedMsg").remove()});
-    initWasm();
-} else {
-    console.log("web assembly is not supported in your browser")
+if ('content' in document.createElement('template')) {
+  if (WebAssembly) {
+      document.addEventListener("DOMContentLoaded", function(){document.getElementById("notSupportedMsg").remove();main()});
+      initWasm();
+  } else {
+      console.log("web assembly is not supported in your browser")
+  }
+}else{
+  console.log("html templates is not supported in your browser")
 }
 
