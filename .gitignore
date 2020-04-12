@@ -1,0 +1,4 @@
+go.sum
+build
+.vscode
+app.wasm
