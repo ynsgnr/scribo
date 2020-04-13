@@ -2,16 +2,21 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <script src="build/wasm_exec.js"></script>
-        <script src="init.js"></script>
+        <script>
+        if ('content' in document.createElement('template')) {
+            document.addEventListener("DOMContentLoaded", function(){document.getElementById("notSupportedMsg").remove();});
+        }else{
+            console.log("html templates is not supported in your browser")
+        }
+        </script>
 
-        <script src="source/app.js"></script>
+        <script type="module" src="source/app.js"></script>
     </head>
     <body>
         <div style="text-align: center;" id="notSupportedMsg">
             <h1>Your browser is not supported by scribo</h1>
             <h2>Please use latest versions of Mozilla Firefox, Google Chrome, Safari or Edge</h2>
         </div>
-        <app-main/>
+        <app-main></app-main>
     </body>
 </html>
