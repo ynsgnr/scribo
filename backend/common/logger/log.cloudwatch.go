@@ -69,7 +69,7 @@ func (l *cloudWatchWriter) Write(p []byte) (n int, err error) {
 		output, err := l.cloudwatch.PutLogEvents(&cloudwatchlogs.PutLogEventsInput{
 			LogEvents: []*cloudwatchlogs.InputLogEvent{
 				{
-					Message:   aws.String(fmt.Sprintf("%s: %s", level, msg)),
+					Message:   aws.String(fmt.Sprintf("(%s) %s: %s", l.source, level, msg)),
 					Timestamp: &timestamp,
 				},
 			},
