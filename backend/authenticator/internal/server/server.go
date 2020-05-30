@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -9,11 +10,13 @@ type Server interface {
 }
 
 type server struct {
-	router *httprouter.Router
+	router  *httprouter.Router
+	cognito *cognitoidentityprovider.CognitoIdentityProvider
 }
 
-func NewServer() (Server, error) {
+func NewServer(cognito *cognitoidentityprovider.CognitoIdentityProvider) (Server, error) {
 	return &server{
-		router: httprouter.New(),
+		router:  httprouter.New(),
+		cognito: cognito,
 	}, nil
 }

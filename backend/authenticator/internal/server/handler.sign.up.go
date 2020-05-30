@@ -6,6 +6,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func (s *server) handleSignUp(http.ResponseWriter, *http.Request, httprouter.Params) {
+func (s *server) handleSignUp(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 }
