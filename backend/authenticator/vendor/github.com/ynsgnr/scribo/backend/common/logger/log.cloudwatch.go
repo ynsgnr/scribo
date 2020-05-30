@@ -45,7 +45,7 @@ func (l *cloudWatchWriter) Write(p []byte) (n int, err error) {
 		var ok bool
 		if len(logMessage) >= 21 {
 			msg = logMessage[21:]
-			msg = strings.ReplaceAll(msg, "\n", "\\n")
+			msg = strings.ReplaceAll(msg, "\n", " ")
 			level, ok = LevelMap[LogLevel(logMessage[20])]
 			if !ok {
 				level = LevelMap[Default]
@@ -64,19 +64,28 @@ func (l *cloudWatchWriter) Write(p []byte) (n int, err error) {
 			}
 		}
 		timestamp := t.UnixNano() / int64(time.Millisecond)
+		message := fmt.Sprintf("(%s) %s: %s", l.source, level, msg)
 		//Send the actual request
 		l.mutex.Lock()
-		output, err := l.cloudwatch.PutLogEvents(&cloudwatchlogs.PutLogEventsInput{
+		logData := &cloudwatchlogs.PutLogEventsInput{
 			LogEvents: []*cloudwatchlogs.InputLogEvent{
 				{
-					Message:   aws.String(fmt.Sprintf("%s: %s", level, msg)),
+					Message:   aws.String(message),
 					Timestamp: &timestamp,
 				},
 			},
 			LogGroupName:  aws.String(logGroupName),
 			LogStreamName: aws.String(logStreamName),
 			SequenceToken: seqToken,
-		})
+		}
+		output, err := l.cloudwatch.PutLogEvents(logData)
+		if tokenExc, ok := err.(*cloudwatchlogs.InvalidSequenceTokenException); ok {
+			if seqToken != nil {
+				fmt.Println("WARNING: logging to cloudwatch: ErrCodeInvalidSequenceTokenException")
+			}
+			logData.SequenceToken = tokenExc.ExpectedSequenceToken
+			output, err = l.cloudwatch.PutLogEvents(logData)
+		}
 		if err != nil {
 			fmt.Printf("ERROR: logging to cloudwatch: %s\n", err.Error())
 		}
@@ -92,7 +101,7 @@ func (l *cloudWatchWriter) Write(p []byte) (n int, err error) {
 				output.RejectedLogEventsInfo.TooOldLogEventEndIndex != nil) {
 			fmt.Printf("ERROR: %s\n", output.GoString())
 		}
-		fmt.Printf("%s: %s\n", level, msg)
+		fmt.Println(message)
 	}()
 	return len(p), nil
 }
