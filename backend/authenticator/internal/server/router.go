@@ -8,5 +8,5 @@ func (s *server) ListenAndServe() error {
 	s.router.PATCH("/auth/user", s.handleResetPassword)
 	s.router.DELETE("/auth/user", s.handleSignOut)
 
-	return http.ListenAndServe(":8080", s.router)
+	return http.ListenAndServe(":80", s.router)
 }
