@@ -43,6 +43,13 @@ github.com/jmespath/go-jmespath
 # github.com/julienschmidt/httprouter v1.3.0
 ## explicit
 github.com/julienschmidt/httprouter
+# github.com/pkg/errors v0.9.1
+github.com/pkg/errors
+# github.com/ynsgnr/scribo/backend/common/configencoding v0.0.0-20200531140425-627268760b43
+## explicit
+github.com/ynsgnr/scribo/backend/common/configencoding
+github.com/ynsgnr/scribo/backend/common/configencoding/parser
+github.com/ynsgnr/scribo/backend/common/configencoding/source
 # github.com/ynsgnr/scribo/backend/common/logger v0.0.0-20200530215022-e08a1d19dc41
 ## explicit
 github.com/ynsgnr/scribo/backend/common/logger
