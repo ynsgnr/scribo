@@ -6,6 +6,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func (s *server) handleResetPassword(http.ResponseWriter, *http.Request, httprouter.Params) {
-
+func (s *server) handleResetPassword(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	s.writeError(NotImplemented{}, w)
 }
