@@ -6,9 +6,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
 )
 
-type UserExistsException struct {
-	error
-}
+type UserExistsException struct{ error }
+type AuthChallengeException struct{ error }
+type JSONMarshallError struct{ error }
 
 func (s *server) writeError(err error, w http.ResponseWriter) {
 	switch err.(type) {
@@ -37,6 +37,13 @@ func (s *server) writeError(err error, w http.ResponseWriter) {
 	case UserExistsException:
 		w.WriteHeader(http.StatusConflict)
 		_, _ = w.Write([]byte("user already exists"))
+	case AuthChallengeException:
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = w.Write([]byte("account is blocked, auth challenge needs to be completed"))
+	case JSONMarshallError:
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte(err.Error()))
+
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 	}

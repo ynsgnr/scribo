@@ -5,8 +5,8 @@ import (
 )
 
 type Config struct {
-	ClientId   string `env:"CLIENTID" validate:"required"`
-	UserPoolId string `env:"USERPOOLID" validate:"required"`
+	ClientId   string `env:"CLIENT_ID" validate:"required"`
+	UserPoolId string `env:"USER_POOL_ID" validate:"required"`
 }
 
 func InitConfig() (Config, error) {

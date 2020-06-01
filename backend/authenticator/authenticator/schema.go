@@ -4,13 +4,14 @@ type Email string
 type Password string
 type Token string
 
-type SignUpRequest struct {
-	Email    Email    `json:"email"`
-	Password Password `json:"pass"`
+type Base struct {
+	Email    Email    `json:"email,omitempty"`
+	Password Password `json:"pass,omitempty"`
+	Token    Token    `json:"token,omitempty"`
 }
 
-type SignInRequest struct {
-	Email    Email    `json:"email"`
-	Password Password `json:"pass"`
-	Token    Token    `json:"token"`
-}
+type SignUpRequest Base
+
+type SignInRequest Base
+
+type SignInResponse Base
