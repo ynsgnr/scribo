@@ -35,19 +35,9 @@ func (s *server) handleSignIn(w http.ResponseWriter, r *http.Request, _ httprout
 			"REFRESH_TOKEN": aws.String(string(signInRequest.Token)),
 		}
 	}
-	result, err := s.cognito.AdminInitiateAuth(input)
+	result, err := s.signIn(input, signInRequest.Base)
 	if err != nil {
 		s.writeError(err, w)
-		logger.Printf(logger.Error, " (%s) handleSignIn: cognito.AdminInitiateAuth: %s", signInRequest.Email, err.Error())
-		return
-	}
-	if result.ChallengeName != nil {
-		s.writeError(AuthChallengeException{}, w)
-		return
-	}
-	if result.AuthenticationResult == nil {
-		s.writeError(errors.New("auth result is nul"), w)
-		logger.Printf(logger.Error, " (%s) handleSignIn: result.AuthenticationResult is nul. result: %+v", signInRequest.Email, result)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -58,4 +48,20 @@ func (s *server) handleSignIn(w http.ResponseWriter, r *http.Request, _ httprout
 		return
 	}
 	_, _ = w.Write(body)
+}
+
+func (s *server) signIn(input *cognitoidentityprovider.AdminInitiateAuthInput, signInRequest authenticator.Base) (*cognitoidentityprovider.AdminInitiateAuthOutput, error) {
+	result, err := s.cognito.AdminInitiateAuth(input)
+	if err != nil {
+		logger.Printf(logger.Error, " (%s) signIn: cognito.AdminInitiateAuth: %s", signInRequest.Email, err.Error())
+		return nil, err
+	}
+	if result.ChallengeName != nil {
+		return nil, AuthChallengeException{}
+	}
+	if result.AuthenticationResult == nil {
+		logger.Printf(logger.Error, " (%s) signIn: result.AuthenticationResult is nul. result: %+v", signInRequest.Email, result)
+		return nil, errors.New("auth result is nul")
+	}
+	return result, nil
 }

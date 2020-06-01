@@ -9,6 +9,7 @@ import (
 type UserExistsException struct{ error }
 type AuthChallengeException struct{ error }
 type JSONMarshallError struct{ error }
+type NotImplemented struct{ error }
 
 func (s *server) writeError(err error, w http.ResponseWriter) {
 	switch err.(type) {
@@ -43,7 +44,8 @@ func (s *server) writeError(err error, w http.ResponseWriter) {
 	case JSONMarshallError:
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte(err.Error()))
-
+	case NotImplemented:
+		w.WriteHeader(http.StatusNotImplemented)
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 	}

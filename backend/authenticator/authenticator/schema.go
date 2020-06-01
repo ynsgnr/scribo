@@ -10,8 +10,10 @@ type Base struct {
 	Token    Token    `json:"token,omitempty"`
 }
 
-type SignUpRequest Base
+type SignUpRequest struct{ Base }
 
-type SignInRequest Base
+type SignInRequest struct{ Base }
 
-type SignInResponse Base
+type SignInResponse struct{ Base }
+
+type SignOutRequest struct{ Base }
