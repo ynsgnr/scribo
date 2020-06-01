@@ -42,12 +42,12 @@ func SetWithCustomSources(cfg interface{}, sources map[string]source.Source, par
 					if tagValue, ok := destination.Type().Field(i).Tag.Lookup(DefaultTag); ok {
 						value = tagValue
 					} else if tagValue, ok := destination.Type().Field(i).Tag.Lookup(ValidateTag); ok && tagValue == RequiredValue {
-						return errors.Wrapf(RequiredValueMissing, "for field %s with type %s", field.Name, field.Type.String())
+						return errors.Wrapf(RequiredValueMissing, "for field %s with type %s (%s:%s)", field.Name, field.Type.String(), tagID, tag)
 					}
 				}
 				parser, ok := parsers[field.Type.Kind()]
 				if !ok {
-					return errors.Wrapf(ParserNotFound, "for field %s with type %s", field.Name, field.Type.String())
+					return errors.Wrapf(ParserNotFound, "for field %s with type %s (%s:%s)", field.Name, field.Type.String(), tagID, tag)
 				}
 				parsedValue, err := parser.Parse(value)
 				if err != nil {
