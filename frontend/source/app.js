@@ -9,8 +9,8 @@ class App extends HTMLElement {
             template.innerHTML = `
             <div style = "min-height: 100%; width:100%;">
                 <scribo-header></scribo-header>
-                <div style = "margin: 0 auto; text-align: center; overflow:auto; min-height: 100%;">
-                    <div style = "float: right; width:30%; padding: 1%; overflow:auto; ">
+                <div style = "margin: 0 auto; text-align: center; overflow:auto; height:100%; ">
+                    <div style = "float: right; width:30%; height:100%; padding: 1%; overflow:auto;">
                         <scribo-auth></scribo-auth>
                     </div>
                 </div>
