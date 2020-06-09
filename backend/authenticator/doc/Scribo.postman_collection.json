@@ -1,0 +1,184 @@
+{
+	"info": {
+		"_postman_id": "1ab23179-db37-4516-b035-7d6e0adf4889",
+		"name": "Scribo",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Sign Up",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\":\"yunusgnr@test2.com\",\n\t\"pass\":\"YunusAlp1996\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/auth/user",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"auth",
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sign In Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "35107a09-42df-4453-bb17-36e615127520",
+						"exec": [
+							"var jsonData = pm.response.json();\r",
+							"pm.environment.set(\"AccessToken\", jsonData.AccessToken);\r",
+							"if (jsonData.RefreshToken!=null){\r",
+							"    pm.environment.set(\"RefreshToken\", jsonData.RefreshToken);\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\":\"yunusgnr@gmail.com\",\n\t\"token\":\"{{RefreshToken}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/auth/user",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"auth",
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sign In",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6c314eb2-6f46-4616-a400-893d749bfcad",
+						"exec": [
+							"var jsonData = pm.response.json();\r",
+							"pm.environment.set(\"AccessToken\", jsonData.AccessToken);\r",
+							"pm.environment.set(\"RefreshToken\", jsonData.RefreshToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\":\"yunusgnr@gmail.com\",\n\t\"pass\":\"YunusAlp1996\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/auth/user",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"auth",
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sign Out",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6fbfe02d-3462-41bc-a44f-68326e8b58e8",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\":\"yunusgnr@gmail.com\",\n\t\"token\":\"{{RefreshToken}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/auth/user",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"auth",
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Validate Token",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{AccessToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/auth/user",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"auth",
+						"user"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
