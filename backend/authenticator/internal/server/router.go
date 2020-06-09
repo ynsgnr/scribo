@@ -7,6 +7,7 @@ func (s *server) ListenAndServe() error {
 	s.router.PUT("/auth/user", s.handleSignIn)
 	s.router.PATCH("/auth/user", s.handleResetPassword)
 	s.router.DELETE("/auth/user", s.handleSignOut)
+	s.router.GET("/auth/user", s.handleValidate)
 
-	return http.ListenAndServe(":80", s.router)
+	return http.ListenAndServe(":81", s.router)
 }
