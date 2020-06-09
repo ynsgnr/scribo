@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 
@@ -8,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
 	"github.com/julienschmidt/httprouter"
 	"github.com/ynsgnr/scribo/backend/authenticator/authenticator"
+	"github.com/ynsgnr/scribo/backend/common"
 )
 
 func (s *server) handleValidate(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -19,12 +21,19 @@ func (s *server) handleValidate(w http.ResponseWriter, r *http.Request, _ httpro
 		return
 	}
 	accessToken := authData[1][1:]
-	_, err := s.cognito.GetUser(&cognitoidentityprovider.GetUserInput{
+	response, err := s.cognito.GetUser(&cognitoidentityprovider.GetUserInput{
 		AccessToken: aws.String(accessToken),
 	})
-	if err != nil {
+	if err != nil || response.Username == nil {
 		s.writeError(&cognitoidentityprovider.NotAuthorizedException{}, w)
 		return
 	}
+	internalID, externalID, err := common.CalculateIDs(*response.Username, s.internalGeneratorSecret, s.extrenalGeneratorSecret)
+	if err != nil {
+		s.writeError(errors.New("can not generate id"), w)
+		return
+	}
+	w.Header().Add(authenticator.HttpInternalCustomerIDHeader, internalID)
+	w.Header().Add(authenticator.HttpCustomerIDHeader, externalID)
 	w.WriteHeader(http.StatusNoContent)
 }

@@ -11,10 +11,12 @@ type Server interface {
 }
 
 type server struct {
-	router          *httprouter.Router
-	cognito         *cognitoidentityprovider.CognitoIdentityProvider
-	cognitoClient   string
-	cognitoUserPool string
+	router                  *httprouter.Router
+	cognito                 *cognitoidentityprovider.CognitoIdentityProvider
+	cognitoClient           string
+	cognitoUserPool         string
+	internalGeneratorSecret string
+	extrenalGeneratorSecret string
 }
 
 func NewServer(cognito *cognitoidentityprovider.CognitoIdentityProvider, cfg config.Config) (Server, error) {

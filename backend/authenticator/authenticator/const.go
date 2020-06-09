@@ -4,6 +4,8 @@ const (
 	ServiceName = "authenticator"
 	Version     = "1"
 
-	HttpAuthHeader = "Authorization"
-	HttpAuthType   = "Bearer"
+	HttpAuthHeader               = "Authorization"
+	HttpInternalCustomerIDHeader = "I-Customer-ID"
+	HttpCustomerIDHeader         = "Customer"
+	HttpAuthType                 = "Bearer"
 )
