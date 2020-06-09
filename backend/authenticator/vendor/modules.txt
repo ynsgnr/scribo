@@ -1,4 +1,4 @@
-# github.com/aws/aws-sdk-go v1.31.8
+# github.com/aws/aws-sdk-go v1.31.14
 ## explicit
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/awserr
@@ -45,11 +45,14 @@ github.com/jmespath/go-jmespath
 github.com/julienschmidt/httprouter
 # github.com/pkg/errors v0.9.1
 github.com/pkg/errors
-# github.com/ynsgnr/scribo/backend/common/configencoding v0.0.0-20200601204219-008644c25399
+# github.com/ynsgnr/scribo/backend/common v0.0.0-20200609232453-d49c82a8906a
+## explicit
+github.com/ynsgnr/scribo/backend/common
+# github.com/ynsgnr/scribo/backend/common/configencoding v0.0.0-20200609232453-d49c82a8906a
 ## explicit
 github.com/ynsgnr/scribo/backend/common/configencoding
 github.com/ynsgnr/scribo/backend/common/configencoding/parser
 github.com/ynsgnr/scribo/backend/common/configencoding/source
-# github.com/ynsgnr/scribo/backend/common/logger v0.0.0-20200601204219-008644c25399
+# github.com/ynsgnr/scribo/backend/common/logger v0.0.0-20200609232453-d49c82a8906a
 ## explicit
 github.com/ynsgnr/scribo/backend/common/logger
