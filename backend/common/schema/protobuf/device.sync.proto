@@ -5,9 +5,14 @@ option go_package =  "./generated/adddevice_pb";
 
 message AddDevice{
     string deviceName = 1;
-    string deviceType = 2;
+    DeviceType deviceType = 2;
 
     KindleSync kindleSync = 3;
+}
+
+enum DeviceType {
+      UNKNOWN_DEVICE = 0;
+      KINDLE = 1;  
 }
 
 message KindleSync{
