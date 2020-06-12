@@ -1,0 +1,9 @@
+syntax = "proto3";
+package scribo;
+
+option go_package =  "./generated/kindlesync_pb";
+
+message KindleSync{
+    string deviceName = 1;
+    string kindleEmail = 2;
+}
