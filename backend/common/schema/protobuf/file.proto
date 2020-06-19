@@ -1,0 +1,10 @@
+syntax = "proto3";
+package scribo;
+
+option go_package =  "./generated/file";
+
+message ConvertFile {
+    string fileID = 1;
+    string fileLocation = 2;
+    string target = 3;
+}

@@ -1,0 +1,29 @@
+syntax = "proto3";
+package scribo;
+
+option go_package =  "./generated/device";
+
+message AddDevice{
+    string deviceName = 1;
+    string deviceID = 2;
+    DeviceType deviceType = 3;
+
+    AddKindle addKindle = 4;
+}
+
+message Sync2Device{
+    string syncID = 1;
+    string deviceID = 2;
+    string fileID = 3;
+    string fileLocation = 4;
+}
+
+enum DeviceType {
+      UNKNOWN_DEVICE = 0;
+      KINDLE = 1;  
+}
+
+message AddKindle{
+    string kindleEmail = 1;
+}
+
