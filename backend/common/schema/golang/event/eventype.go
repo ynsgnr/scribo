@@ -20,6 +20,7 @@ const (
 	EventTypeSendMailSuccess    Type = "SendMailSuccess"
 )
 
+// GetEventTypeFromHeaders - returns value for first event type header instance
 func GetEventTypeFromHeaders(headers []kafka.Header) Type {
 	for _, header := range headers {
 		if header.Key == EventTypeIdentifier {
