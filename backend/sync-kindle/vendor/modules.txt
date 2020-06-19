@@ -48,19 +48,20 @@ github.com/golang/protobuf/proto
 github.com/jmespath/go-jmespath
 # github.com/pkg/errors v0.9.1
 github.com/pkg/errors
-# github.com/ynsgnr/scribo/backend/common v0.0.0-20200619224329-716bd524a250
+# github.com/ynsgnr/scribo/backend/common v0.0.0-20200619230203-cd7776d6a30f
 ## explicit
 github.com/ynsgnr/scribo/backend/common/schema/golang/event
 github.com/ynsgnr/scribo/backend/common/schema/protobuf/generated/device
-# github.com/ynsgnr/scribo/backend/common/configencoding v0.0.0-20200619224329-716bd524a250
+# github.com/ynsgnr/scribo/backend/common/configencoding v0.0.0-20200619230203-cd7776d6a30f
 ## explicit
 github.com/ynsgnr/scribo/backend/common/configencoding
 github.com/ynsgnr/scribo/backend/common/configencoding/parser
 github.com/ynsgnr/scribo/backend/common/configencoding/source
-# github.com/ynsgnr/scribo/backend/common/logger v0.0.0-20200619224329-716bd524a250
+# github.com/ynsgnr/scribo/backend/common/logger v0.0.0-20200619230203-cd7776d6a30f
 ## explicit
 github.com/ynsgnr/scribo/backend/common/logger
 # google.golang.org/protobuf v1.24.0
+## explicit
 google.golang.org/protobuf/encoding/prototext
 google.golang.org/protobuf/encoding/protowire
 google.golang.org/protobuf/internal/descfmt
