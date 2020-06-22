@@ -11,6 +11,7 @@ github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds
 github.com/aws/aws-sdk-go/aws/credentials/endpointcreds
 github.com/aws/aws-sdk-go/aws/credentials/processcreds
 github.com/aws/aws-sdk-go/aws/credentials/stscreds
+github.com/aws/aws-sdk-go/aws/crr
 github.com/aws/aws-sdk-go/aws/csm
 github.com/aws/aws-sdk-go/aws/defaults
 github.com/aws/aws-sdk-go/aws/ec2metadata
@@ -35,6 +36,7 @@ github.com/aws/aws-sdk-go/private/protocol/query/queryutil
 github.com/aws/aws-sdk-go/private/protocol/rest
 github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
 github.com/aws/aws-sdk-go/service/cloudwatchlogs
+github.com/aws/aws-sdk-go/service/dynamodb
 github.com/aws/aws-sdk-go/service/sts
 github.com/aws/aws-sdk-go/service/sts/stsiface
 # github.com/confluentinc/confluent-kafka-go v1.4.2
@@ -42,22 +44,22 @@ github.com/aws/aws-sdk-go/service/sts/stsiface
 github.com/confluentinc/confluent-kafka-go/kafka
 github.com/confluentinc/confluent-kafka-go/kafka/librdkafka
 # github.com/golang/protobuf v1.4.2
-## explicit
 github.com/golang/protobuf/proto
 # github.com/jmespath/go-jmespath v0.3.0
 github.com/jmespath/go-jmespath
 # github.com/pkg/errors v0.9.1
 github.com/pkg/errors
-# github.com/ynsgnr/scribo/backend/common v0.0.0-20200619230203-cd7776d6a30f
+# github.com/ynsgnr/scribo/backend/common v0.0.0-20200619233638-743041e5013f
 ## explicit
 github.com/ynsgnr/scribo/backend/common/schema/golang/event
 github.com/ynsgnr/scribo/backend/common/schema/protobuf/generated/device
-# github.com/ynsgnr/scribo/backend/common/configencoding v0.0.0-20200619230203-cd7776d6a30f
+github.com/ynsgnr/scribo/backend/common/schema/protobuf/generated/mail
+# github.com/ynsgnr/scribo/backend/common/configencoding v0.0.0-20200619233638-743041e5013f
 ## explicit
 github.com/ynsgnr/scribo/backend/common/configencoding
 github.com/ynsgnr/scribo/backend/common/configencoding/parser
 github.com/ynsgnr/scribo/backend/common/configencoding/source
-# github.com/ynsgnr/scribo/backend/common/logger v0.0.0-20200619230203-cd7776d6a30f
+# github.com/ynsgnr/scribo/backend/common/logger v0.0.0-20200619233638-743041e5013f
 ## explicit
 github.com/ynsgnr/scribo/backend/common/logger
 # google.golang.org/protobuf v1.24.0
