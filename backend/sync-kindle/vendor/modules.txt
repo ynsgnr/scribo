@@ -48,6 +48,7 @@ github.com/golang/protobuf/proto
 # github.com/jmespath/go-jmespath v0.3.0
 github.com/jmespath/go-jmespath
 # github.com/pkg/errors v0.9.1
+## explicit
 github.com/pkg/errors
 # github.com/ynsgnr/scribo/backend/common v0.0.0-20200619233638-743041e5013f
 ## explicit

@@ -9,7 +9,7 @@ import (
 func (c *controller) SyncDevice(sync2Device *device.Sync2Device) (*mail.SendMail, error) {
 	email, err := c.repository.Read(sync2Device.DeviceID)
 	if err != nil {
-		return nil, errors.Wrapf(err, "controller: SyncDevice: repository.Read: %w for %s", sync2Device.DeviceID)
+		return nil, errors.Wrapf(err, "controller: SyncDevice: repository.Read: for %s", sync2Device.DeviceID)
 	}
 	return &mail.SendMail{
 		MailID:             sync2Device.SyncID,
