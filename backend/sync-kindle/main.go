@@ -15,7 +15,10 @@ import (
 	"github.com/ynsgnr/scribo/backend/sync-kindle/internal/controller"
 	"github.com/ynsgnr/scribo/backend/sync-kindle/internal/repository"
 	"github.com/ynsgnr/scribo/backend/sync-kindle/internal/service"
-	"github.com/ynsgnr/scribo/backend/sync-kindle/synckindle"
+)
+
+const (
+	ServiceName = "sync-kindle"
 )
 
 func main() {
@@ -26,7 +29,7 @@ func main() {
 	ses := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
-	log.SetOutput(logger.New(ses, synckindle.ServiceName))
+	log.SetOutput(logger.New(ses, ServiceName))
 	logger.Print(logger.Info, "starting service")
 
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
