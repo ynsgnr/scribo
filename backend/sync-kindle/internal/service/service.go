@@ -48,8 +48,10 @@ func (s *service) Run() {
 
 	for s.keepRunning {
 		msg, err := s.consumer.ReadMessage(-1)
-		if err == nil {
+		if err != nil {
 			logger.Printf(logger.Error, "ReadMessage: %s", err.Error())
+		} else if msg == nil || msg.TopicPartition.Topic == nil || msg.Headers == nil {
+			logger.Printf(logger.Error, "ReadMessage: nil topic or nil headers: %+v", msg)
 		} else {
 			s.topics(*msg.TopicPartition.Topic, msg.Key, msg.Value, event.GetEventTypeFromHeaders(msg.Headers))
 		}
