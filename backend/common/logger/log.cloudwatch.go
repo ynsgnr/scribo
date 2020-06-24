@@ -49,6 +49,7 @@ func (l *cloudWatchWriter) Write(p []byte) (n int, err error) {
 			level, ok = LevelMap[LogLevel(logMessage[20])]
 			if !ok {
 				level = LevelMap[Default]
+				msg = logMessage[20:]
 			}
 			year, yerr := strconv.Atoi(logMessage[0:4])
 			month, merr := strconv.Atoi(logMessage[5:7])
@@ -57,10 +58,10 @@ func (l *cloudWatchWriter) Write(p []byte) (n int, err error) {
 			min, minerr := strconv.Atoi(logMessage[14:16])
 			sec, serr := strconv.Atoi(logMessage[17:19])
 
-			t = time.Date(year, time.Month(month), day, hour, min, sec, 0, time.Local).UTC()
 			if yerr != nil || merr != nil || derr != nil || herr != nil || minerr != nil || serr != nil {
 				fmt.Printf("ERROR: parsing time")
-				t = now
+			} else {
+				t = time.Date(year, time.Month(month), day, hour, min, sec, 0, time.Local).UTC()
 			}
 		}
 		timestamp := t.UnixNano() / int64(time.Millisecond)
