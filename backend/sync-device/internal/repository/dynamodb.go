@@ -87,6 +87,39 @@ func (ddb *dynamoRepo) ReadDevices(userID string) ([]*Device, error) {
 	return returnValue, err
 }
 
+func (ddb *dynamoRepo) GetDevice(userID string, deviceID string) (*Device, error) {
+	resp, err := ddb.dbClient.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String(ddb.tableName),
+		Key: map[string]*dynamodb.AttributeValue{
+			dynamoUserID: {S: aws.String(userID)},
+			dynamoItemID: {S: aws.String(deviceID)},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	value := &Device{}
+	err = dynamodbattribute.UnmarshalMap(resp.Item, value)
+	return value, err
+}
+
+func (ddb *dynamoRepo) UpdateSendState(userID string, deviceID string, syncID string, state State) error {
+	value := dynamodb.AttributeValue{S: aws.String(string(state))}
+	_, err := ddb.dbClient.UpdateItem(&dynamodb.UpdateItemInput{
+		TableName: aws.String(ddb.tableName),
+		Key: map[string]*dynamodb.AttributeValue{
+			dynamoUserID: {S: aws.String(userID)},
+			dynamoItemID: {S: aws.String(fmt.Sprintf("%s#%s#%s", dynamoSendType, deviceID, syncID))},
+		},
+		AttributeUpdates: map[string]*dynamodb.AttributeValueUpdate{
+			dynamoState: {
+				Value: &value,
+			},
+		},
+	})
+	return err
+}
+
 // WriteDevice create a new device, overrides old device data including send book data
 func (ddb *dynamoRepo) WriteDevice(device *Device) error {
 	if device.DeviceID == "" {

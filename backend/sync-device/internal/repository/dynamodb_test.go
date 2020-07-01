@@ -210,3 +210,74 @@ func TestDynamoDbCreateSend(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestDynamoDbGetCreate(t *testing.T) {
+	ses := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+	client := dynamodb.New(ses, aws.NewConfig())
+	dynamoRepo := repository.NewDynamoRepo(client, tableName)
+	err := dynamoRepo.WriteDevice(testDevice)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	err = dynamoRepo.WriteSend(testSend)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	testDevice.Send = nil
+	e, err := json.Marshal(testDevice)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	expected := string(e)
+	resp, err := dynamoRepo.GetDevice(testDevice.UserID, testDevice.DeviceID)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	a, err := json.Marshal(resp)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	actual := string(a)
+	if !strings.Contains(actual, expected) {
+		t.Errorf("Expected:\n%+v\nIn Actual:\n%+v", expected, actual)
+		return
+	}
+	// Update send state
+	err = dynamoRepo.UpdateSendState(testSend.UserID, testSend.DeviceID, testSend.SyncID, repository.StateWaitingSync)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	testSend.State = repository.StateWaitingSync
+	respSend, err := dynamoRepo.GetSendByFileID(testSend.UserID, testSend.FileID)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	e, err = json.Marshal(testSend)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	expected = string(e)
+	a, err = json.Marshal(respSend)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	actual = string(a)
+	if !strings.Contains(actual, expected) {
+		t.Errorf("Expected:\n%+v\nIn Actual:\n%+v", expected, actual)
+	}
+	err = dynamoRepo.DeleteDevice(testDevice)
+	if err != nil {
+		t.Error(err)
+	}
+}

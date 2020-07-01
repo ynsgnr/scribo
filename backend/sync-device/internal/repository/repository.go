@@ -6,8 +6,9 @@ import (
 
 type Device struct {
 	device.AddDevice
-	UserID string           `json:"userID"`
-	Send   map[string]*Send `json:"send"`
+	FileTarget string           `json:"fileTarget"`
+	UserID     string           `json:"userID"`
+	Send       map[string]*Send `json:"send"`
 }
 
 type State string
@@ -28,6 +29,8 @@ type Interface interface {
 	WriteDevice(*Device) error
 	WriteSend(*Send) error
 	GetSendByFileID(string, string) (*Send, error)
+	GetDevice(string, string) (*Device, error)
+	UpdateSendState(userID string, deviceID string, syncID string, state State) error
 	ReadDevices(string) ([]*Device, error)
 	DeleteDevice(*Device) error
 }
