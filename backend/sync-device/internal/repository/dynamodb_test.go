@@ -39,6 +39,7 @@ var (
 		Sync2Device: device.Sync2Device{
 			SyncID:   "testSync",
 			DeviceID: testDevice.DeviceID,
+			FileID:   "testFile",
 		},
 		UserID: "testUser",
 		State:  repository.StateWaitingSync,

@@ -1,7 +1,9 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -11,9 +13,11 @@ import (
 
 const (
 	//devicesTable   = "sync-device"
+	dynamoItemID   = "itemID"
 	dynamoDeviceID = "deviceID"
 	dynamoUserID   = "userID"
 	dynamoSend     = "send"
+	dynamoSendType = "SEND"
 )
 
 func NewDynamoRepo(dbClient *dynamodb.DynamoDB, tableName string) Interface {
@@ -42,33 +46,58 @@ func (ddb *dynamoRepo) ReadDevices(userID string) ([]*Device, error) {
 	if err != nil {
 		return nil, err
 	}
-	values := make([]*Device, 0, len(result.Items))
+	values := map[string]*Device{}
 	for _, item := range result.Items {
-		value := Device{}
-		err = dynamodbattribute.UnmarshalMap(item, &value)
-		if err != nil {
-			return nil, err
+		if _, ok := item[dynamoItemID]; !ok {
+			return nil, errors.New("ReadDevices: item is missing deviceID")
 		}
-		values = append(values, &value)
+		if strings.Contains(*item[dynamoItemID].S, dynamoSendType) {
+			value := Send{}
+			err = dynamodbattribute.UnmarshalMap(item, &value)
+			if err != nil {
+				return nil, err
+			}
+			if _, ok := values[value.DeviceID]; !ok {
+				values[value.DeviceID] = &Device{
+					Send: map[string]*Send{},
+				}
+			}
+			values[value.DeviceID].Send[value.SyncID] = &value
+		} else {
+			value := Device{}
+			err = dynamodbattribute.UnmarshalMap(item, &value)
+			if err != nil {
+				return nil, err
+			}
+			if _, ok := values[value.DeviceID]; ok {
+				value.Send = values[value.DeviceID].Send
+			}
+			values[value.DeviceID] = &value
+		}
 	}
-	return values, err
+	returnValue := make([]*Device, 0, len(values))
+	for _, d := range values {
+		if d.Send == nil {
+			d.Send = map[string]*Send{}
+		}
+		returnValue = append(returnValue, d)
+	}
+	return returnValue, err
 }
 
 // WriteDevice create a new device, overrides old device data including send book data
 func (ddb *dynamoRepo) WriteDevice(device *Device) error {
+	if device.DeviceID == "" {
+		device.DeviceID = uuid.NewV4().String()
+	}
 	dbItem, err := dynamodbattribute.MarshalMap(device)
 	if err != nil {
 		return err
 	}
-	if device.DeviceID == "" {
-		device.DeviceID = uuid.NewV4().String()
+	dbItem[dynamoItemID] = &dynamodb.AttributeValue{
+		S: aws.String(device.DeviceID),
 	}
-	if _, ok := dbItem[dynamoSend]; ok {
-		dbItem[dynamoSend] = &dynamodb.AttributeValue{
-			M: map[string]*dynamodb.AttributeValue{},
-		}
-	}
-
+	delete(dbItem, dynamoSend)
 	_, err = ddb.dbClient.PutItem(&dynamodb.PutItemInput{
 		TableName: aws.String(ddb.tableName),
 		Item:      dbItem,
@@ -78,40 +107,51 @@ func (ddb *dynamoRepo) WriteDevice(device *Device) error {
 
 // DeleteDevice Delete a device
 func (ddb *dynamoRepo) DeleteDevice(device *Device) error {
-	_, err := ddb.dbClient.DeleteItem(&dynamodb.DeleteItemInput{
-		TableName: aws.String(ddb.tableName),
-		Key: map[string]*dynamodb.AttributeValue{
-			dynamoUserID: {
-				S: aws.String(device.UserID),
-			},
-			dynamoDeviceID: {
-				S: aws.String(device.DeviceID),
-			},
+	response, err := ddb.dbClient.Query(&dynamodb.QueryInput{
+		TableName:              aws.String(ddb.tableName),
+		KeyConditionExpression: aws.String(fmt.Sprintf("%s = :userid", dynamoUserID)),
+		FilterExpression:       aws.String(fmt.Sprintf("%s = :deviceid", dynamoDeviceID)),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":userid":   {S: aws.String(device.UserID)},
+			":deviceid": {S: aws.String(device.DeviceID)},
 		},
 	})
-	return err
-}
-
-// WriteSend Create or update a send book data inside a device, if device doesn't exists it will create it
-func (ddb *dynamoRepo) WriteSend(send *Send) error {
-	dbItem, err := dynamodbattribute.Marshal(send)
 	if err != nil {
 		return err
 	}
-	_, err = ddb.dbClient.UpdateItem(&dynamodb.UpdateItemInput{
-		TableName:        aws.String(ddb.tableName),
-		UpdateExpression: aws.String(fmt.Sprintf("SET %s.%s = :i", dynamoSend, send.SyncID)),
-		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":i": dbItem,
-		},
-		Key: map[string]*dynamodb.AttributeValue{
-			dynamoUserID: {
-				S: aws.String(send.UserID),
+	for _, r := range response.Items {
+		if _, ok := r[dynamoUserID]; !ok {
+			return fmt.Errorf("DeleteDevice: dynamoUserID not found inside item: %+v", r)
+		}
+		if _, ok := r[dynamoItemID]; !ok {
+			return fmt.Errorf("DeleteDevice: dynamoItemID not found inside item: %+v", r)
+		}
+		_, err = ddb.dbClient.DeleteItem(&dynamodb.DeleteItemInput{
+			TableName: aws.String(ddb.tableName),
+			Key: map[string]*dynamodb.AttributeValue{
+				dynamoUserID: r[dynamoUserID],
+				dynamoItemID: r[dynamoItemID],
 			},
-			dynamoDeviceID: {
-				S: aws.String(send.DeviceID),
-			},
-		},
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// WriteSend Create or update a send book data
+func (ddb *dynamoRepo) WriteSend(send *Send) error {
+	dbItem, err := dynamodbattribute.MarshalMap(send)
+	if err != nil {
+		return err
+	}
+	dbItem[dynamoItemID] = &dynamodb.AttributeValue{
+		S: aws.String(fmt.Sprintf("%s#%s#%s", dynamoSendType, send.DeviceID, send.SyncID)),
+	}
+	_, err = ddb.dbClient.PutItem(&dynamodb.PutItemInput{
+		TableName: aws.String(ddb.tableName),
+		Item:      dbItem,
 	})
 	return err
 }
