@@ -27,7 +27,7 @@ type Send struct {
 type Interface interface {
 	WriteDevice(*Device) error
 	WriteSend(*Send) error
-	UpdateStateByFileID(string, string, State) error
-	ReadDevices(userID string) ([]*Device, error)
-	DeleteDevice(device *Device) error
+	GetSendByFileID(string, string) (*Send, error)
+	ReadDevices(string) ([]*Device, error)
+	DeleteDevice(*Device) error
 }

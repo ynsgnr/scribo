@@ -150,12 +150,33 @@ func TestDynamoDbCreateSend(t *testing.T) {
 		t.Errorf("Expected:\n%+v\nIn Actual:\n%+v", expected, actual)
 	}
 	// Update send state
-	testSend.State = repository.StateDone
-	err = dynamoRepo.UpdateStateByFileID(testSend.UserID, testSend.FileID, repository.StateDone)
+	respSend, err := dynamoRepo.GetSendByFileID(testSend.UserID, testSend.FileID)
 	if err != nil {
 		t.Error(err)
 		return
 	}
+	e, err = json.Marshal(testSend)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	expected = string(e)
+	a, err = json.Marshal(respSend)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	actual = string(a)
+	if !strings.Contains(actual, expected) {
+		t.Errorf("Expected:\n%+v\nIn Actual:\n%+v", expected, actual)
+	}
+	respSend.State = repository.StateDone
+	err = dynamoRepo.WriteSend(respSend)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	testSend.State = repository.StateDone
 	testDevice.Send = map[string]*repository.Send{
 		testSend.SyncID: testSend,
 	}

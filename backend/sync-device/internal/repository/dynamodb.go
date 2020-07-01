@@ -159,7 +159,7 @@ func (ddb *dynamoRepo) WriteSend(send *Send) error {
 }
 
 // Updates state by given fileID
-func (ddb *dynamoRepo) UpdateStateByFileID(userID string, fileID string, state State) error {
+func (ddb *dynamoRepo) GetSendByFileID(userID string, fileID string) (*Send, error) {
 	response, err := ddb.dbClient.Query(&dynamodb.QueryInput{
 		TableName:              aws.String(ddb.tableName),
 		KeyConditionExpression: aws.String(fmt.Sprintf("%s = :userid", dynamoUserID)),
@@ -170,24 +170,12 @@ func (ddb *dynamoRepo) UpdateStateByFileID(userID string, fileID string, state S
 		},
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if len(response.Items) != 1 {
-		return fmt.Errorf("UpdateStateByFileID: unexpected number of items inside query response: %+v", response.Items)
+		return nil, fmt.Errorf("UpdateStateByFileID: unexpected number of items inside query response: %+v", response.Items)
 	}
-	if _, ok := response.Items[0][dynamoItemID]; !ok {
-		return fmt.Errorf("UpdateStateByFileID: dynamoItemID is not present: %+v", response.Items)
-	}
-	_, err = ddb.dbClient.UpdateItem(&dynamodb.UpdateItemInput{
-		TableName: aws.String(ddb.tableName),
-		Key: map[string]*dynamodb.AttributeValue{
-			dynamoUserID: {S: aws.String(userID)},
-			dynamoItemID: response.Items[0][dynamoItemID],
-		},
-		UpdateExpression: aws.String(fmt.Sprintf(" SET %s = :newState", dynamoState)),
-		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":newState": {S: aws.String(string(state))},
-		},
-	})
-	return err
+	value := &Send{}
+	err = dynamodbattribute.UnmarshalMap(response.Items[0], &value)
+	return value, err
 }
