@@ -21,12 +21,13 @@ const (
 type Send struct {
 	device.Sync2Device
 	UserID string `json:"userID"`
-	State  State  `json:"state"`
+	State  State  `json:"syncState"`
 }
 
 type Interface interface {
 	WriteDevice(*Device) error
 	WriteSend(*Send) error
+	UpdateStateByFileID(string, string, State) error
 	ReadDevices(userID string) ([]*Device, error)
 	DeleteDevice(device *Device) error
 }

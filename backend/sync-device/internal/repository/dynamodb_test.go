@@ -149,9 +149,9 @@ func TestDynamoDbCreateSend(t *testing.T) {
 	if !strings.Contains(actual, expected) {
 		t.Errorf("Expected:\n%+v\nIn Actual:\n%+v", expected, actual)
 	}
-	// Update send
+	// Update send state
 	testSend.State = repository.StateDone
-	err = dynamoRepo.WriteSend(testSend)
+	err = dynamoRepo.UpdateStateByFileID(testSend.UserID, testSend.FileID, repository.StateDone)
 	if err != nil {
 		t.Error(err)
 		return

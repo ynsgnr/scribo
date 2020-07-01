@@ -15,6 +15,8 @@ const (
 	//devicesTable   = "sync-device"
 	dynamoItemID   = "itemID"
 	dynamoDeviceID = "deviceID"
+	dynamoFileID   = "fileID"
+	dynamoState    = "syncState"
 	dynamoUserID   = "userID"
 	dynamoSend     = "send"
 	dynamoSendType = "SEND"
@@ -152,6 +154,40 @@ func (ddb *dynamoRepo) WriteSend(send *Send) error {
 	_, err = ddb.dbClient.PutItem(&dynamodb.PutItemInput{
 		TableName: aws.String(ddb.tableName),
 		Item:      dbItem,
+	})
+	return err
+}
+
+// Updates state by given fileID
+func (ddb *dynamoRepo) UpdateStateByFileID(userID string, fileID string, state State) error {
+	response, err := ddb.dbClient.Query(&dynamodb.QueryInput{
+		TableName:              aws.String(ddb.tableName),
+		KeyConditionExpression: aws.String(fmt.Sprintf("%s = :userid", dynamoUserID)),
+		FilterExpression:       aws.String(fmt.Sprintf("%s = :fileid", dynamoFileID)),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":userid": {S: aws.String(userID)},
+			":fileid": {S: aws.String(fileID)},
+		},
+	})
+	if err != nil {
+		return err
+	}
+	if len(response.Items) != 1 {
+		return fmt.Errorf("UpdateStateByFileID: unexpected number of items inside query response: %+v", response.Items)
+	}
+	if _, ok := response.Items[0][dynamoItemID]; !ok {
+		return fmt.Errorf("UpdateStateByFileID: dynamoItemID is not present: %+v", response.Items)
+	}
+	_, err = ddb.dbClient.UpdateItem(&dynamodb.UpdateItemInput{
+		TableName: aws.String(ddb.tableName),
+		Key: map[string]*dynamodb.AttributeValue{
+			dynamoUserID: {S: aws.String(userID)},
+			dynamoItemID: response.Items[0][dynamoItemID],
+		},
+		UpdateExpression: aws.String(fmt.Sprintf(" SET %s = :newState", dynamoState)),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":newState": {S: aws.String(string(state))},
+		},
 	})
 	return err
 }
