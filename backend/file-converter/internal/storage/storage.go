@@ -3,6 +3,6 @@ package storage
 import "io"
 
 type Interface interface {
-	GetFile(string) (io.Reader, error)
-	WriteFile(string, io.Reader)
+	DownloadFile(string) (string, error)
+	UploadFile(string, io.Reader) (string, error)
 }
