@@ -7,11 +7,13 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/ynsgnr/scribo/backend/common/logger"
 	"github.com/ynsgnr/scribo/backend/file-converter/internal/config"
 	"github.com/ynsgnr/scribo/backend/file-converter/internal/controller"
 	"github.com/ynsgnr/scribo/backend/file-converter/internal/service"
+	"github.com/ynsgnr/scribo/backend/file-converter/internal/storage"
 )
 
 const (
@@ -43,7 +45,8 @@ func main() {
 		panic(err)
 	}
 
-	controller := controller.NewController(nil)
+	storage := storage.NewStorageS3(s3manager.NewDownloader(ses), s3manager.NewUploader(ses), cfg.S3Bucket, cfg.TMPFolder)
+	controller := controller.NewController(storage)
 	s := service.NewService(c, p, controller, cfg.FileTopic)
 	OnShutDown(func() { s.Shutdown(time.Second) })
 	s.Run()
