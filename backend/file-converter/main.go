@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"os/signal"
 	"time"
 
@@ -30,6 +32,12 @@ func main() {
 	}))
 	log.SetOutput(logger.New(ses, ServiceName))
 	logger.Print(logger.Info, "starting service")
+
+	//Check if converter installed
+	_, err = exec.LookPath("ebook-convert")
+	if err != nil {
+		panic(fmt.Errorf("ebook-convert command not found: %w", err))
+	}
 
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": cfg.KafkaEndpoint,

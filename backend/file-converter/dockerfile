@@ -1,10 +1,14 @@
 FROM golang:1.14-alpine AS build
-RUN apk add --no-cache gcc musl-dev
+RUN apk add --no-cache gcc musl-dev 
 WORKDIR /app
 COPY . .
 RUN go build -tags musl -o main
 
 FROM alpine AS run
+RUN apk add --no-cache python2 tar
 WORKDIR /app
+RUN wget https://download.calibre-ebook.com/linux-installer.sh && chmod +x linux-installer.sh
+RUN ./linux-installer.sh isolated=y install_dir=.
+ENV PATH="/app/calibre:${PATH}"
 COPY --from=build /app/main .
 ENTRYPOINT ./main

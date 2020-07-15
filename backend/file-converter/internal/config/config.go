@@ -7,7 +7,7 @@ import (
 type Config struct {
 	FileTopic string `env:"ADD_DEVICE_TOPIC" default:"file"`
 	S3Bucket  string `env:"STORAGE_S3_BUCKET" default:"fileconverter"`
-	TMPFolder string `env:"TMP" validate:"required"`
+	TMPFolder string `env:"TMPDIR" default:"./tmp"`
 
 	KafkaEndpoint string `env:"KAFKA" default:"kafka:9092"`
 	KafkaGroupID  string `env:"KAFKA_GROUP" default:"myGroup"`
