@@ -16,25 +16,42 @@ func (s *service) syncDevice(key []byte, value []byte) {
 		logger.Printf(logger.Error, "syncDevice: unmarshal: %s", err.Error())
 		return
 	}
-	fileConvert, err := s.controller.SyncDevice(string(key), sync2Device)
+	fileConvert, deviceSync, err := s.controller.SyncDevice(string(key), sync2Device)
 	if err != nil {
 		logger.Printf(logger.Error, err.Error())
 		return
 	}
-	msg, err := proto.Marshal(fileConvert)
-	if err != nil {
-		logger.Printf(logger.Error, "syncDevice: controller.SyncDevice: Marshal: %s for %s", err.Error(), fileConvert.FileID)
-		return
+	if deviceSync != nil {
+		msg, err := proto.Marshal(sync2Device)
+		if err != nil {
+			logger.Printf(logger.Error, "syncDevice: controller.SyncDevice: Marshal: %s for %s", err.Error(), sync2Device.SyncID)
+			return
+		}
+		s.producer.Produce(&kafka.Message{
+			TopicPartition: kafka.TopicPartition{Topic: &s.syncDeviceTopic, Partition: kafka.PartitionAny},
+			Key:            key,
+			Value:          msg,
+			Headers: []kafka.Header{{
+				Key:   string(event.TypeIdentifier),
+				Value: []byte(event.TypeSend2DeviceSuccess),
+			}},
+		}, nil)
+	} else {
+		msg, err := proto.Marshal(fileConvert)
+		if err != nil {
+			logger.Printf(logger.Error, "syncDevice: controller.SyncDevice: Marshal: %s for %s", err.Error(), fileConvert.FileID)
+			return
+		}
+		s.producer.Produce(&kafka.Message{
+			TopicPartition: kafka.TopicPartition{Topic: &s.syncDeviceTopic, Partition: kafka.PartitionAny},
+			Key:            key,
+			Value:          msg,
+			Headers: []kafka.Header{{
+				Key:   string(event.TypeIdentifier),
+				Value: []byte(event.TypeSendMail),
+			}},
+		}, nil)
 	}
-	s.producer.Produce(&kafka.Message{
-		TopicPartition: kafka.TopicPartition{Topic: &s.syncDeviceTopic, Partition: kafka.PartitionAny},
-		Key:            key,
-		Value:          msg,
-		Headers: []kafka.Header{{
-			Key:   string(event.TypeIdentifier),
-			Value: []byte(event.TypeSendMail),
-		}},
-	}, nil)
 }
 
 func (s *service) syncDeviceSuccessfull(key []byte, value []byte) {
@@ -55,17 +72,17 @@ func (s *service) convertFileSuccess(key []byte, value []byte) {
 	convertFile := &file.ConvertFile{}
 	err := proto.Unmarshal(value, convertFile)
 	if err != nil {
-		logger.Printf(logger.Error, "syncMailSuccess: unmarshal: %s", err.Error())
+		logger.Printf(logger.Error, "convertFileSuccess: unmarshal: %s", err.Error())
 		return
 	}
 	sync2Device, err := s.controller.ConvertFileSuccessfull(string(key), convertFile)
 	if err != nil {
-		logger.Printf(logger.Error, "syncMailSuccess: controller.ConvertFileSuccessfull: %s", err.Error())
+		logger.Printf(logger.Error, "convertFileSuccess: controller.ConvertFileSuccessfull: %s", err.Error())
 		return
 	}
 	msg, err := proto.Marshal(sync2Device)
 	if err != nil {
-		logger.Printf(logger.Error, "syncMailSuccess: controller.AddDevice: Marshal: %s for %s", err.Error(), convertFile.FileID)
+		logger.Printf(logger.Error, "convertFileSuccess: controller.AddDevice: Marshal: %s for %s", err.Error(), convertFile.FileID)
 		return
 	}
 	s.producer.Produce(&kafka.Message{

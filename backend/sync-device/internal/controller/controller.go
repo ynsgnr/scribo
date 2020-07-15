@@ -8,7 +8,7 @@ import (
 
 type Interface interface {
 	AddDevice(string, *device.AddDevice) (*device.AddDevice, error)
-	SyncDevice(string, *device.Sync2Device) (*file.ConvertFile, error)
+	SyncDevice(string, *device.Sync2Device) (*file.ConvertFile, *device.Sync2Device, error)
 	ConvertFileSuccessfull(string, *file.ConvertFile) (*device.Sync2Device, error)
 	SyncDeviceSuccessfull(string, *device.Sync2Device) error
 }

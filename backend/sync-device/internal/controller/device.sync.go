@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"path"
+
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 	"github.com/ynsgnr/scribo/backend/common/schema/protobuf/generated/device"
@@ -8,26 +10,34 @@ import (
 	"github.com/ynsgnr/scribo/backend/sync-device/internal/repository"
 )
 
-func (c *controller) SyncDevice(userID string, sync2Device *device.Sync2Device) (*file.ConvertFile, error) {
+func (c *controller) SyncDevice(userID string, sync2Device *device.Sync2Device) (*file.ConvertFile, *device.Sync2Device, error) {
 	device, err := c.repository.GetDevice(userID, sync2Device.DeviceID)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	fileID := uuid.NewV4().String()
 	sync2Device.FileID = fileID
+	if path.Base(sync2Device.FileLocation) == device.FileTarget {
+		c.repository.WriteSend(&repository.Send{
+			Sync2Device: *sync2Device,
+			UserID:      userID,
+			State:       repository.StateWaitingSync,
+		})
+		return nil, sync2Device, nil
+	}
 	err = c.repository.WriteSend(&repository.Send{
 		Sync2Device: *sync2Device,
 		UserID:      userID,
 		State:       repository.StateWaitingFileConvert,
 	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "controller: SyncDevice: repository.WriteSend: for %s", sync2Device.DeviceID)
+		return nil, nil, errors.Wrapf(err, "controller: SyncDevice: repository.WriteSend: for %s", sync2Device.DeviceID)
 	}
 	return &file.ConvertFile{
 		FileID:       fileID,
 		FileLocation: sync2Device.FileLocation,
 		Target:       device.FileTarget,
-	}, nil
+	}, nil, nil
 }
 
 func (c *controller) ConvertFileSuccessfull(userID string, convertFile *file.ConvertFile) (*device.Sync2Device, error) {
