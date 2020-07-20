@@ -40,13 +40,18 @@ func (s *server) handleSignIn(w http.ResponseWriter, r *http.Request, _ httprout
 		s.writeError(err, w)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	body, err := json.Marshal(result.AuthenticationResult)
+	signInResponse := authenticator.SignInResponse{
+		Token:        authenticator.Token(*result.AuthenticationResult.AccessToken),
+		RefreshToken: authenticator.Token(*result.AuthenticationResult.RefreshToken),
+		ExpiresIn:    *result.AuthenticationResult.ExpiresIn,
+	}
+	body, err := json.Marshal(signInResponse)
 	if err != nil {
 		s.writeError(errors.New("auth result failed to marshall"), w)
-		logger.Printf(logger.Error, " (%s) handleSignIn: result.AuthenticationResult failed to marshall result: %+v", signInRequest.Email, result)
+		logger.Printf(logger.Error, " (%s) handleSignIn: signInResponse failed to marshall result: %+v", signInRequest.Email, result)
 		return
 	}
+	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(body)
 }
 

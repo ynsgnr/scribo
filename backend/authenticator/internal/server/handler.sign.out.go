@@ -37,5 +37,5 @@ func (s *server) handleSignOut(w http.ResponseWriter, r *http.Request, _ httprou
 		s.writeError(err, w)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusNoContent)
 }
