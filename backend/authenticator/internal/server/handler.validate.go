@@ -33,7 +33,7 @@ func (s *server) handleValidate(w http.ResponseWriter, r *http.Request, _ httpro
 		s.writeError(errors.New("can not generate id"), w)
 		return
 	}
-	w.Header().Add(authenticator.HttpInternalCustomerIDHeader, internalID)
-	w.Header().Add(authenticator.HttpCustomerIDHeader, externalID)
+	w.Header().Add(authenticator.HttpInternalUserIDHeader, internalID)
+	w.Header().Add(authenticator.HttpUserIDHeader, externalID)
 	w.WriteHeader(http.StatusNoContent)
 }

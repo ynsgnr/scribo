@@ -131,5 +131,5 @@ func (c *authenticatorSDK) ValidateToken(token string) (string, string, error) {
 	default:
 		return "", "", fmt.Errorf("%w: got %d", UnexpectedStatusCode, res.StatusCode)
 	}
-	return r.Header.Get(HttpCustomerIDHeader), r.Header.Get(HttpInternalCustomerIDHeader), nil
+	return r.Header.Get(HttpUserIDHeader), r.Header.Get(HttpInternalUserIDHeader), nil
 }
