@@ -40,9 +40,22 @@ func (s *server) handleSignIn(w http.ResponseWriter, r *http.Request, _ httprout
 		s.writeError(err, w)
 		return
 	}
+	if result.AuthenticationResult == nil {
+		logger.Printf(logger.Error, "handleSignIn: unexpected result: %+v", result)
+		s.writeError(authenticator.NotAuthorized, w)
+		return
+	}
+	accessToken := authenticator.Token("")
+	refreshToken := authenticator.Token("")
+	if result.AuthenticationResult.AccessToken != nil {
+		accessToken = authenticator.Token(*result.AuthenticationResult.AccessToken)
+	}
+	if result.AuthenticationResult.RefreshToken != nil {
+		refreshToken = authenticator.Token(*result.AuthenticationResult.RefreshToken)
+	}
 	signInResponse := authenticator.SignInResponse{
-		Token:        authenticator.Token(*result.AuthenticationResult.AccessToken),
-		RefreshToken: authenticator.Token(*result.AuthenticationResult.RefreshToken),
+		Token:        accessToken,
+		RefreshToken: refreshToken,
 		ExpiresIn:    *result.AuthenticationResult.ExpiresIn,
 	}
 	body, err := json.Marshal(signInResponse)
