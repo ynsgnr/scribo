@@ -2,3 +2,4 @@ go.sum
 build
 .vscode
 app.wasm
+infrastructure/secret.env
