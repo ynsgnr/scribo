@@ -115,6 +115,7 @@ func (c *authenticatorSDK) ValidateToken(token string) (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
+	r.Header.Set(HttpAuthHeader, fmt.Sprintf("%s %s", HttpAuthType, token))
 	res, err := c.client.Do(r)
 	if err != nil {
 		return "", "", err
