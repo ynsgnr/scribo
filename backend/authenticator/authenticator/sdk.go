@@ -9,6 +9,10 @@ import (
 	"net/http"
 )
 
+const (
+	name = "authenticator"
+)
+
 type Interface interface {
 	SignUp(SignUpRequest) error
 	SignOut(SignOutRequest) error
@@ -38,7 +42,7 @@ func (c *authenticatorSDK) SignUp(sur SignUpRequest) error {
 	if err != nil {
 		return err
 	}
-	r, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/auth/v1/user", c.host), bytes.NewReader(body))
+	r, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/authenticator/v1/user", c.host), bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
@@ -64,7 +68,7 @@ func (c *authenticatorSDK) SignOut(sor SignOutRequest) error {
 	if err != nil {
 		return err
 	}
-	r, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/auth/v1/user/session", c.host), bytes.NewReader(body))
+	r, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/authenticator/v1/user/session", c.host), bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
@@ -90,7 +94,7 @@ func (c *authenticatorSDK) SignIn(sir SignInRequest) (SignInResponse, error) {
 	if err != nil {
 		return SignInResponse{}, err
 	}
-	r, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/auth/v1/user/session", c.host), bytes.NewReader(body))
+	r, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%s/authenticator/v1/user/session", c.host), bytes.NewReader(body))
 	if err != nil {
 		return SignInResponse{}, err
 	}
@@ -115,7 +119,7 @@ func (c *authenticatorSDK) SignIn(sir SignInRequest) (SignInResponse, error) {
 }
 
 func (c *authenticatorSDK) ValidateToken(token string) (string, string, error) {
-	r, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/auth/v1/user/session", c.host), nil)
+	r, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/authenticator/v1/user/session", c.host), nil)
 	if err != nil {
 		return "", "", err
 	}
