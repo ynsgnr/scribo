@@ -9,7 +9,7 @@ import (
 func (s *service) ListenAndServe() error {
 	s.router = httprouter.New()
 
-	s.router.GET("sync-device/v1/users/:userID/devices", s.handleGetDevice)
+	s.router.GET("sync-device/v1/user/:userID/devices", s.handleGetDevice)
 
 	s.httpServer = &http.Server{Addr: ":80", Handler: s.router}
 	return s.httpServer.ListenAndServe()

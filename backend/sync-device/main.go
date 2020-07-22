@@ -51,6 +51,8 @@ func main() {
 	s := service.NewService(c, p, controller, repository, cfg.CommandTopic, cfg.FileConvertTopic, cfg.AddDeviceTopic, cfg.SyncDeviceTopic)
 	OnShutDown(func() { s.Shutdown(time.Second) })
 	s.Run()
+	//Wait for error logs to send
+	time.Sleep(time.Second)
 }
 
 func OnShutDown(f func()) {
