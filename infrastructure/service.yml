@@ -1,0 +1,40 @@
+version: '3'
+services:
+  gateway:
+    image: gateway:latest
+    env_file: 
+     - ./secret.env
+    volumes:
+      - ${home}/.aws:/home/.aws
+    ports:
+      - "80:80"
+  authenticator:
+    image: authenticator:latest
+    env_file: 
+     - ./secret.env
+    volumes:
+      - ${home}/.aws:/home/.aws
+  sync-device:
+    image: sync-device:latest
+    env_file: 
+     - ./secret.env
+    volumes:
+      - ${home}/.aws:/home/.aws
+  sync-kindle:
+    image: sync-kindle:latest
+    env_file: 
+     - ./secret.env
+    volumes:
+      - ${home}/.aws:/home/.aws
+  sync-mail:
+    image: sync-mail:latest
+    env_file: 
+     - ./secret.env
+    volumes:
+      - ${home}/.aws:/home/.aws
+  file-converter:
+    image: file-converter:latest
+    env_file: 
+     - ./secret.env
+    volumes:
+      - ${home}/.aws:/home/.aws
