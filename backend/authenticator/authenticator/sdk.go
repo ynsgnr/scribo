@@ -9,10 +9,6 @@ import (
 	"net/http"
 )
 
-const (
-	name = "authenticator"
-)
-
 type Interface interface {
 	SignUp(SignUpRequest) error
 	SignOut(SignOutRequest) error
@@ -56,9 +52,7 @@ func (c *authenticatorSDK) SignUp(sur SignUpRequest) error {
 		if err != nil {
 			return err
 		}
-		if res.StatusCode != http.StatusNoContent {
-			return fmt.Errorf("%w: %d: %s", UnexpectedStatusCode, res.StatusCode, string(body))
-		}
+		return fmt.Errorf("%w: %d: %s", UnexpectedStatusCode, res.StatusCode, string(body))
 	}
 	return nil
 }
@@ -82,9 +76,7 @@ func (c *authenticatorSDK) SignOut(sor SignOutRequest) error {
 		if err != nil {
 			return err
 		}
-		if res.StatusCode != http.StatusNoContent {
-			return fmt.Errorf("%w: %d: %s", UnexpectedStatusCode, res.StatusCode, string(body))
-		}
+		return fmt.Errorf("%w: %d: %s", UnexpectedStatusCode, res.StatusCode, string(body))
 	}
 	return nil
 }
