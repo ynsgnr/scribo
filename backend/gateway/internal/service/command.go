@@ -20,11 +20,16 @@ func (s *service) handleCommand() http.HandlerFunc {
 			_, _ = w.Write([]byte(fmt.Sprintf("wrong method, %s is accepted", http.MethodPost)))
 			return
 		}
-		eventType := event.Type(r.Header.Get(event.TypeIdentifier))
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			logger.Printf(logger.Error, "handleCommand: reading body: %+v", err)
-			_, _ = w.Write([]byte("unexpected error"))
+		externalUserID, ok := r.Context().Value(authenticator.HttpUserIDHeader).(string)
+		if !ok || externalUserID == "" {
+			logger.Printf(logger.Error, "handleCommand: internal user id context is empty")
+			w.WriteHeader(http.StatusForbidden)
+			_, _ = w.Write([]byte("internal id auth failed"))
+			return
+		}
+		if r.URL.Path != fmt.Sprintf("/command/v1/user/%s/command", externalUserID) {
+			logger.Printf(logger.Trace, "handleCommand: wrong path: %s", r.URL.Path)
+			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 		internalUserID, ok := r.Context().Value(authenticator.HttpInternalUserIDHeader).(string)
@@ -33,12 +38,19 @@ func (s *service) handleCommand() http.HandlerFunc {
 			w.WriteHeader(http.StatusForbidden)
 			_, _ = w.Write([]byte("internal id auth failed"))
 		}
+		eventType := event.Type(r.Header.Get(event.TypeIdentifier))
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			logger.Printf(logger.Error, "handleCommand: reading body: %+v", err)
+			_, _ = w.Write([]byte("unexpected error"))
+			return
+		}
 		logger.Printf(logger.Trace, "customer %s commanded %s with data: %s", internalUserID, eventType, string(body))
 		switch eventType {
 		case event.TypeAddDevice:
-			s.unmarshalAndSend(w, event.TypeAddDevice, device.AddDevice{}, internalUserID, body)
+			s.unmarshalAndSend(w, event.TypeAddDevice, &device.AddDevice{}, internalUserID, body)
 		case event.TypeSend2Device:
-			s.unmarshalAndSend(w, event.TypeSend2Device, device.Sync2Device{}, internalUserID, body)
+			s.unmarshalAndSend(w, event.TypeSend2Device, &device.Sync2Device{}, internalUserID, body)
 		default:
 			w.WriteHeader(http.StatusBadRequest)
 			_, _ = w.Write([]byte("unknown event type"))
@@ -49,7 +61,7 @@ func (s *service) handleCommand() http.HandlerFunc {
 func (s *service) unmarshalAndSend(w http.ResponseWriter, eventType event.Type, template interface{}, key string, body []byte) {
 	err := json.Unmarshal(body, &template)
 	if err != nil {
-		logger.Printf(logger.Error, "handleCommand %s: UnmarshalAndSend: %s", event.TypeAddDevice, string(body))
+		logger.Printf(logger.Error, "handleCommand %s: UnmarshalAndSend: %s: %+v", eventType, string(body), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("unexpected error"))
 		return
@@ -60,7 +72,7 @@ func (s *service) unmarshalAndSend(w http.ResponseWriter, eventType event.Type, 
 		Data:      template,
 	})
 	if err != nil {
-		logger.Printf(logger.Error, "handleCommand %s: UnmarshalAndSend: %s: commander.Send:", event.TypeAddDevice, string(body))
+		logger.Printf(logger.Error, "handleCommand %s: UnmarshalAndSend: %s: commander.Send: %+v", eventType, string(body), err)
 		_, _ = w.Write([]byte("unexpected error"))
 		return
 	}
