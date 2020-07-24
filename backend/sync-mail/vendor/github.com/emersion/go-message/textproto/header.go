@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/textproto"
-	"regexp"
 	"strings"
 )
 
@@ -21,11 +20,30 @@ func newHeaderField(k, v string, b []byte) *headerField {
 	return &headerField{k: textproto.CanonicalMIMEHeaderKey(k), v: v, b: b}
 }
 
+func (f *headerField) raw() ([]byte, error) {
+	if f.b != nil {
+		return f.b, nil
+	} else {
+		for pos, ch := range f.k {
+			// check if character is a printable US-ASCII except ':'
+			if !(ch >= '!' && ch < ':' || ch > ':' && ch <= '~') {
+				return nil, fmt.Errorf("field name contains incorrect symbols (\\x%x at %v)", ch, pos)
+			}
+		}
+
+		if pos := strings.IndexAny(f.v, "\r\n"); pos != -1 {
+			return nil, fmt.Errorf("field value contains \\r\\n (at %v)", pos)
+		}
+
+		return []byte(formatHeaderField(f.k, f.v)), nil
+	}
+}
+
 // A Header represents the key-value pairs in a message header.
 //
 // The header representation is idempotent: if the header can be read and
 // written, the result will be exactly the same as the original (including
-// whitespace). This is required for e.g. DKIM.
+// whitespace and header field ordering). This is required for e.g. DKIM.
 //
 // Mutating the header is restricted: the only two allowed operations are
 // inserting a new header field at the top and deleting a header field. This is
@@ -90,6 +108,9 @@ func (h *Header) AddRaw(kv []byte) {
 
 // Add adds the key, value pair to the header. It prepends to any existing
 // fields associated with key.
+//
+// Key and value should obey character requirements of RFC 6532.
+// If you need to format/fold lines manually, use AddRaw
 func (h *Header) Add(k, v string) {
 	k = textproto.CanonicalMIMEHeaderKey(k)
 
@@ -110,6 +131,23 @@ func (h *Header) Get(k string) string {
 		return ""
 	}
 	return fields[len(fields)-1].v
+}
+
+// Raw gets the first raw header field associated with the given key.
+//
+// The returned bytes contain a complete field in the "Key: value" form,
+// including trailing CRLF.
+//
+// The returned slice should not be modified and becomes invalid when the
+// header is updated.
+//
+// Error is returned if header contains incorrect characters (RFC 6532)
+func (h *Header) Raw(k string) ([]byte, error) {
+	fields := h.m[textproto.CanonicalMIMEHeaderKey(k)]
+	if len(fields) == 0 {
+		return nil, nil
+	}
+	return fields[len(fields)-1].raw()
 }
 
 // Set sets the header fields associated with key to the single field value.
@@ -147,7 +185,7 @@ func (h *Header) Copy() Header {
 	return Header{l: l, m: m}
 }
 
-// Len returns the amount of fields in the header.
+// Len returns the number of fields in the header.
 func (h *Header) Len() int {
 	return len(h.l)
 }
@@ -162,8 +200,16 @@ type HeaderFields interface {
 	Key() string
 	// Value returns the value of the current field.
 	Value() string
+	// Raw returns the raw current header field. See Header.Raw.
+	Raw() ([]byte, error)
 	// Del deletes the current field.
 	Del()
+	// Len returns the amount of header fields in the subset of header iterated
+	// by this HeaderFields instance.
+	//
+	// For Fields(), it will return the amount of fields in the whole header section.
+	// For FieldsByKey(), it will return the amount of fields with certain key.
+	Len() int
 }
 
 type headerFields struct {
@@ -198,6 +244,10 @@ func (fs *headerFields) Value() string {
 	return fs.field().v
 }
 
+func (fs *headerFields) Raw() ([]byte, error) {
+	return fs.field().raw()
+}
+
 func (fs *headerFields) Del() {
 	f := fs.field()
 
@@ -218,6 +268,10 @@ func (fs *headerFields) Del() {
 
 	fs.h.l = append(fs.h.l[:fs.index()], fs.h.l[fs.index()+1:]...)
 	fs.cur--
+}
+
+func (fs *headerFields) Len() int {
+	return len(fs.h.l)
 }
 
 // Fields iterates over all the header fields.
@@ -260,6 +314,10 @@ func (fs *headerFieldsByKey) Value() string {
 	return fs.field().v
 }
 
+func (fs *headerFieldsByKey) Raw() ([]byte, error) {
+	return fs.field().raw()
+}
+
 func (fs *headerFieldsByKey) Del() {
 	f := fs.field()
 
@@ -282,11 +340,25 @@ func (fs *headerFieldsByKey) Del() {
 	fs.cur--
 }
 
+func (fs *headerFieldsByKey) Len() int {
+	return len(fs.h.m[fs.k])
+}
+
 // FieldsByKey iterates over all fields having the specified key.
 //
 // The header may not be mutated while iterating, except using HeaderFields.Del.
 func (h *Header) FieldsByKey(k string) HeaderFields {
 	return &headerFieldsByKey{h, textproto.CanonicalMIMEHeaderKey(k), -1}
+}
+
+// TooBigError is returned by ReadHeader if one of header components are larger
+// than allowed.
+type TooBigError struct {
+	desc string
+}
+
+func (err TooBigError) Error() string {
+	return "textproto: length limit exceeded: " + err.desc
 }
 
 func readLineSlice(r *bufio.Reader, line []byte) ([]byte, error) {
@@ -297,6 +369,11 @@ func readLineSlice(r *bufio.Reader, line []byte) ([]byte, error) {
 		}
 
 		line = append(line, l...)
+
+		if len(line) > maxLineOctets {
+			return nil, TooBigError{"line"}
+		}
+
 		if !more {
 			break
 		}
@@ -307,6 +384,11 @@ func readLineSlice(r *bufio.Reader, line []byte) ([]byte, error) {
 
 func isSpace(c byte) bool {
 	return c == ' ' || c == '\t'
+}
+
+func validHeaderKeyByte(b byte) bool {
+	c := int(b)
+	return c >= 33 && c <= 126 && c != ':'
 }
 
 // trim returns s with leading and trailing spaces and tabs removed.
@@ -323,24 +405,6 @@ func trim(s []byte) []byte {
 	return s[i:n]
 }
 
-// skipSpace skips R over all spaces and returns the number of bytes skipped.
-func skipSpace(r *bufio.Reader) int {
-	n := 0
-	for {
-		c, err := r.ReadByte()
-		if err != nil {
-			// bufio will keep err until next read.
-			break
-		}
-		if !isSpace(c) {
-			r.UnreadByte()
-			break
-		}
-		n++
-	}
-	return n
-}
-
 func hasContinuationLine(r *bufio.Reader) bool {
 	c, err := r.ReadByte()
 	if err != nil {
@@ -350,16 +414,21 @@ func hasContinuationLine(r *bufio.Reader) bool {
 	return isSpace(c)
 }
 
-func readContinuedLineSlice(r *bufio.Reader) ([]byte, error) {
+func readContinuedLineSlice(r *bufio.Reader, maxLines int) (int, []byte, error) {
 	// Read the first line. We preallocate slice that it enough
 	// for most fields.
 	line, err := readLineSlice(r, make([]byte, 0, 256))
 	if err != nil {
-		return nil, err
+		return 0, nil, err
+	}
+
+	maxLines--
+	if maxLines <= 0 {
+		return 0, nil, TooBigError{"lines"}
 	}
 
 	if len(line) == 0 { // blank line - no continuation
-		return line, nil
+		return maxLines, line, nil
 	}
 
 	line = append(line, '\r', '\n')
@@ -371,10 +440,15 @@ func readContinuedLineSlice(r *bufio.Reader) ([]byte, error) {
 			break // bufio will keep err until next read.
 		}
 
+		maxLines--
+		if maxLines <= 0 {
+			return 0, nil, TooBigError{"lines"}
+		}
+
 		line = append(line, '\r', '\n')
 	}
 
-	return line, nil
+	return maxLines, line, nil
 }
 
 func writeContinued(b *strings.Builder, l []byte) {
@@ -409,6 +483,11 @@ func trimAroundNewlines(v []byte) string {
 	return b.String()
 }
 
+const (
+	maxHeaderLines = 1000
+	maxLineOctets  = 4000
+)
+
 // ReadHeader reads a MIME header from r. The header is a sequence of possibly
 // continued Key: Value lines ending in a blank line.
 func ReadHeader(r *bufio.Reader) (Header, error) {
@@ -424,8 +503,14 @@ func ReadHeader(r *bufio.Reader) (Header, error) {
 		return newHeader(fs), fmt.Errorf("message: malformed MIME header initial line: %v", string(line))
 	}
 
+	maxLines := maxHeaderLines
+
 	for {
-		kv, err := readContinuedLineSlice(r)
+		var (
+			kv  []byte
+			err error
+		)
+		maxLines, kv, err = readContinuedLineSlice(r, maxLines)
 		if len(kv) == 0 {
 			if err == io.EOF {
 				err = nil
@@ -440,7 +525,17 @@ func ReadHeader(r *bufio.Reader) (Header, error) {
 			return newHeader(fs), fmt.Errorf("message: malformed MIME header line: %v", string(kv))
 		}
 
-		key := textproto.CanonicalMIMEHeaderKey(string(trim(kv[:i])))
+		keyBytes := trim(kv[:i])
+
+		// Verify that there are no invalid characters in the header key.
+		// See RFC 5322 Section 2.2
+		for _, c := range keyBytes {
+			if !validHeaderKeyByte(c) {
+				return newHeader(fs), fmt.Errorf("message: malformed MIME header key: %v", string(keyBytes))
+			}
+		}
+
+		key := textproto.CanonicalMIMEHeaderKey(string(keyBytes))
 
 		// As per RFC 7230 field-name is a token, tokens consist of one or more
 		// chars. We could return a an error here, but better to be liberal in
@@ -461,9 +556,6 @@ func ReadHeader(r *bufio.Reader) (Header, error) {
 	}
 }
 
-// Regexp that detects Quoted Printable (QP) characters
-var qpReg = regexp.MustCompile("(=[0-9A-Z]{2,2})+")
-
 func foldLine(v string, maxlen int) (line, next string, ok bool) {
 	ok = true
 
@@ -479,24 +571,8 @@ func foldLine(v string, maxlen int) (line, next string, ok bool) {
 			folding = "\r\n"
 		}
 	} else {
-		// Find the last QP character before limit
-		foldAtQP := qpReg.FindAllStringIndex(v[:foldBefore], -1)
 		// Find the closest whitespace before maxlen
-		foldAtEOL := strings.LastIndexAny(v[:foldBefore], " \t\n")
-
-		// Fold at the latest whitespace by default
-		foldAt = foldAtEOL
-
-		// if there are QP characters in the string
-		if len(foldAtQP) > 0 {
-			// Get the start index of the last QP character
-			foldAtQPLastIndex := foldAtQP[len(foldAtQP)-1][0]
-			if foldAtQPLastIndex > foldAt {
-				// Fold at the latest QP character if there are no whitespaces
-				// after it and before line length limit
-				foldAt = foldAtQPLastIndex
-			}
-		}
+		foldAt = strings.LastIndexAny(v[:foldBefore], " \t\n")
 
 		if foldAt == 0 {
 			// The whitespace we found was the previous folding WSP
@@ -518,7 +594,7 @@ func foldLine(v string, maxlen int) (line, next string, ok bool) {
 			// extra space in the string, so this should be avoided if
 			// possible.
 			folding = "\r\n "
-			ok = len(foldAtQP) > 0
+			ok = false
 		}
 	}
 
@@ -566,20 +642,14 @@ func formatHeaderField(k, v string) string {
 
 // WriteHeader writes a MIME header to w.
 func WriteHeader(w io.Writer, h Header) error {
-	// TODO: wrap lines when necessary
-
 	for i := len(h.l) - 1; i >= 0; i-- {
 		f := h.l[i]
-
-		var b []byte
-		if f.b != nil {
-			b = f.b
+		if rawField, err := f.raw(); err == nil {
+			if _, err := w.Write(rawField); err != nil {
+				return err
+			}
 		} else {
-			b = []byte(formatHeaderField(f.k, f.v))
-		}
-
-		if _, err := w.Write(b); err != nil {
-			return err
+			return fmt.Errorf("failed to write header field #%v (%q): %w", len(h.l)-i, f.k, err)
 		}
 	}
 
