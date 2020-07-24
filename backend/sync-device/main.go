@@ -48,7 +48,7 @@ func main() {
 
 	repository := repository.NewDynamoRepo(dynamodb.New(ses, aws.NewConfig()), cfg.DynamoTableName)
 	controller := controller.NewController(repository)
-	s := service.NewService(c, p, controller, repository, cfg.CommandTopic, cfg.FileConvertTopic, cfg.AddDeviceTopic, cfg.SyncDeviceTopic)
+	s := service.NewService(c, p, controller, repository, cfg.AddDeviceTopic, cfg.SyncDeviceTopic, cfg.CommandTopic, cfg.FileConvertTopic)
 	OnShutDown(func() { s.Shutdown(time.Second) })
 	s.Run()
 	//Wait for error logs to send
