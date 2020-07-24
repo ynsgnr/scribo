@@ -1,4 +1,4 @@
-# github.com/aws/aws-sdk-go v1.32.13
+# github.com/aws/aws-sdk-go v1.33.11
 ## explicit
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/awserr
@@ -57,17 +57,17 @@ github.com/pkg/errors
 # github.com/satori/go.uuid v1.2.0
 ## explicit
 github.com/satori/go.uuid
-# github.com/ynsgnr/scribo/backend/common v0.0.0-20200629202616-02f917f65e1e
+# github.com/ynsgnr/scribo/backend/common v0.0.0-20200724142024-af93634b8764
 ## explicit
 github.com/ynsgnr/scribo/backend/common/schema/golang/event
 github.com/ynsgnr/scribo/backend/common/schema/protobuf/generated/device
 github.com/ynsgnr/scribo/backend/common/schema/protobuf/generated/file
-# github.com/ynsgnr/scribo/backend/common/configencoding v0.0.0-20200629202616-02f917f65e1e
+# github.com/ynsgnr/scribo/backend/common/configencoding v0.0.0-20200724142024-af93634b8764
 ## explicit
 github.com/ynsgnr/scribo/backend/common/configencoding
 github.com/ynsgnr/scribo/backend/common/configencoding/parser
 github.com/ynsgnr/scribo/backend/common/configencoding/source
-# github.com/ynsgnr/scribo/backend/common/logger v0.0.0-20200629202616-02f917f65e1e
+# github.com/ynsgnr/scribo/backend/common/logger v0.0.0-20200724142024-af93634b8764
 ## explicit
 github.com/ynsgnr/scribo/backend/common/logger
 # google.golang.org/protobuf v1.25.0
