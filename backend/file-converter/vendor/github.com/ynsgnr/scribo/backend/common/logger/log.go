@@ -11,5 +11,5 @@ func Print(level LogLevel, msg string) {
 
 // Printf - logs given message and arguments with log level to default logger
 func Printf(level LogLevel, msg string, v ...interface{}) {
-	log.Printf(string(level)+msg, v)
+	log.Printf(string(level)+msg, v...)
 }
