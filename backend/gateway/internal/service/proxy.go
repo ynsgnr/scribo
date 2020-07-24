@@ -55,6 +55,7 @@ func (s *service) handleProxy() http.HandlerFunc {
 			r.Host = proxyUrl.Host
 			r.URL.Host = proxyUrl.Host
 			r.URL.Scheme = proxyUrl.Scheme
+			r.URL.Path = urlPath
 		},
 			Transport: s.filter,
 		}
