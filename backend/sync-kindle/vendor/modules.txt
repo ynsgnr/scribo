@@ -1,4 +1,4 @@
-# github.com/aws/aws-sdk-go v1.32.6
+# github.com/aws/aws-sdk-go v1.33.11
 ## explicit
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/awserr
@@ -50,20 +50,22 @@ github.com/jmespath/go-jmespath
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
-# github.com/ynsgnr/scribo/backend/common v0.0.0-20200619233638-743041e5013f
+# github.com/satori/go.uuid v1.2.0
+github.com/satori/go.uuid
+# github.com/ynsgnr/scribo/backend/common v0.0.0-20200724142247-347f94d54883
 ## explicit
 github.com/ynsgnr/scribo/backend/common/schema/golang/event
 github.com/ynsgnr/scribo/backend/common/schema/protobuf/generated/device
 github.com/ynsgnr/scribo/backend/common/schema/protobuf/generated/mail
-# github.com/ynsgnr/scribo/backend/common/configencoding v0.0.0-20200619233638-743041e5013f
+# github.com/ynsgnr/scribo/backend/common/configencoding v0.0.0-20200724142247-347f94d54883
 ## explicit
 github.com/ynsgnr/scribo/backend/common/configencoding
 github.com/ynsgnr/scribo/backend/common/configencoding/parser
 github.com/ynsgnr/scribo/backend/common/configencoding/source
-# github.com/ynsgnr/scribo/backend/common/logger v0.0.0-20200619233638-743041e5013f
+# github.com/ynsgnr/scribo/backend/common/logger v0.0.0-20200724142247-347f94d54883
 ## explicit
 github.com/ynsgnr/scribo/backend/common/logger
-# google.golang.org/protobuf v1.24.0
+# google.golang.org/protobuf v1.25.0
 ## explicit
 google.golang.org/protobuf/encoding/prototext
 google.golang.org/protobuf/encoding/protowire
@@ -75,12 +77,11 @@ google.golang.org/protobuf/internal/encoding/messageset
 google.golang.org/protobuf/internal/encoding/tag
 google.golang.org/protobuf/internal/encoding/text
 google.golang.org/protobuf/internal/errors
-google.golang.org/protobuf/internal/fieldnum
 google.golang.org/protobuf/internal/fieldsort
 google.golang.org/protobuf/internal/filedesc
 google.golang.org/protobuf/internal/filetype
 google.golang.org/protobuf/internal/flags
-google.golang.org/protobuf/internal/genname
+google.golang.org/protobuf/internal/genid
 google.golang.org/protobuf/internal/impl
 google.golang.org/protobuf/internal/mapsort
 google.golang.org/protobuf/internal/pragma

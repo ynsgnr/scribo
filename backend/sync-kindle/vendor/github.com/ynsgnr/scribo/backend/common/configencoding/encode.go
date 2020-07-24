@@ -2,6 +2,7 @@ package configencoding
 
 import (
 	"reflect"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/ynsgnr/scribo/backend/common/configencoding/parser"
@@ -19,15 +20,20 @@ func Set(cfg interface{}) error {
 	sources := map[string]source.Source{
 		source.EnvTag: source.Environment{},
 	}
-	parsers := map[reflect.Kind]parser.Parser{
-		reflect.Bool:   parser.BoolParser{},
-		reflect.String: parser.StringParser{},
-		reflect.Int:    parser.IntParser{},
+	var b bool
+	var s string
+	var i int
+	var d time.Duration
+	parsers := map[reflect.Type]parser.Parser{
+		reflect.TypeOf(b): parser.BoolParser{},
+		reflect.TypeOf(s): parser.StringParser{},
+		reflect.TypeOf(i): parser.IntParser{},
+		reflect.TypeOf(d): parser.DurationParser{},
 	}
 	return SetWithCustomSources(cfg, sources, parsers)
 }
 
-func SetWithCustomSources(cfg interface{}, sources map[string]source.Source, parsers map[reflect.Kind]parser.Parser) error {
+func SetWithCustomSources(cfg interface{}, sources map[string]source.Source, parsers map[reflect.Type]parser.Parser) error {
 	value := reflect.ValueOf(cfg)
 	if value.Kind() != reflect.Ptr || value.IsNil() {
 		return RequiredPointer
@@ -45,7 +51,7 @@ func SetWithCustomSources(cfg interface{}, sources map[string]source.Source, par
 						return errors.Wrapf(RequiredValueMissing, "for field %s with type %s (%s:%s)", field.Name, field.Type.String(), tagID, tag)
 					}
 				}
-				parser, ok := parsers[field.Type.Kind()]
+				parser, ok := parsers[field.Type]
 				if !ok {
 					return errors.Wrapf(ParserNotFound, "for field %s with type %s (%s:%s)", field.Name, field.Type.String(), tagID, tag)
 				}
