@@ -11,7 +11,7 @@ type Config struct {
 	SyncDeviceTopic  string `env:"SYNC_DEVICE_TOPIC" default:"device"`
 
 	KafkaEndpoint string `env:"KAFKA" default:"kafka:9092"`
-	KafkaGroupID  string `env:"KAFKA_GROUP" default:"myGroup"`
+	KafkaGroupID  string `env:"KAFKA_GROUP" default:"sync-device"`
 	KafkaOffset   string `env:"KAFKA_OFFSET" default:"earliest"`
 
 	DynamoTableName string `env:"DYNAMO_TABLE_NAME" default:"sync-device"`

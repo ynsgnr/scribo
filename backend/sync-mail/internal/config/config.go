@@ -19,7 +19,7 @@ type Config struct {
 	EmailTopic string `env:"EMAIL_TOPIC" default:"email"`
 
 	KafkaEndpoint string `env:"KAFKA" default:"kafka:9092"`
-	KafkaGroupID  string `env:"KAFKA_GROUP" default:"myGroup"`
+	KafkaGroupID  string `env:"KAFKA_GROUP" default:"sync-mail"`
 	KafkaOffset   string `env:"KAFKA_OFFSET" default:"earliest"`
 
 	ApproveKindlePeriod time.Duration `env:"APPROVE_KINDLE_PERIOD" default:"1m"`

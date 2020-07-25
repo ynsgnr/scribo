@@ -10,7 +10,7 @@ type Config struct {
 	EmailTopic      string `env:"EMAIL_TOPIC" default:"email"`
 
 	KafkaEndpoint string `env:"KAFKA" default:"kafka:9092"`
-	KafkaGroupID  string `env:"KAFKA_GROUP" default:"myGroup"`
+	KafkaGroupID  string `env:"KAFKA_GROUP" default:"sync-kindle"`
 	KafkaOffset   string `env:"KAFKA_OFFSET" default:"earliest"`
 
 	DynamoTableName string `env:"DYNAMO_TABLE_NAME" default:"sync-kindle"`

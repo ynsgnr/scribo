@@ -10,7 +10,7 @@ type Config struct {
 	TMPFolder string `env:"TMPDIR" default:"./tmp"`
 
 	KafkaEndpoint string `env:"KAFKA" default:"kafka:9092"`
-	KafkaGroupID  string `env:"KAFKA_GROUP" default:"myGroup"`
+	KafkaGroupID  string `env:"KAFKA_GROUP" default:"file-converter"`
 	KafkaOffset   string `env:"KAFKA_OFFSET" default:"earliest"`
 }
 
