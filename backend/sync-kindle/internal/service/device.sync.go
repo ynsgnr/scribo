@@ -27,7 +27,7 @@ func (s *service) syncDevice(key []byte, value []byte) {
 		return
 	}
 	s.producer.Produce(&kafka.Message{
-		TopicPartition: kafka.TopicPartition{Topic: &s.addDeviceTopic, Partition: kafka.PartitionAny},
+		TopicPartition: kafka.TopicPartition{Topic: &s.emailTopic, Partition: kafka.PartitionAny},
 		Key:            key,
 		Value:          msg,
 		Headers: []kafka.Header{{

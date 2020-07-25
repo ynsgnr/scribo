@@ -2,9 +2,11 @@ package service
 
 import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/pkg/errors"
 	"github.com/ynsgnr/scribo/backend/common/logger"
 	"github.com/ynsgnr/scribo/backend/common/schema/golang/event"
 	"github.com/ynsgnr/scribo/backend/common/schema/protobuf/generated/device"
+	"github.com/ynsgnr/scribo/backend/sync-kindle/internal/controller"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -16,7 +18,12 @@ func (s *service) addDevice(key []byte, value []byte) {
 		return
 	}
 	addDevice, err = s.controller.AddDevice(addDevice)
-	if err != nil {
+	switch {
+	case err == nil:
+	case errors.Is(err, controller.MissingKindleData):
+		logger.Printf(logger.Warning, err.Error())
+		return
+	default:
 		logger.Printf(logger.Error, err.Error())
 		return
 	}
