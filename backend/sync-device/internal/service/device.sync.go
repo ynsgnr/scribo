@@ -43,12 +43,12 @@ func (s *service) syncDevice(key []byte, value []byte) {
 			return
 		}
 		s.producer.Produce(&kafka.Message{
-			TopicPartition: kafka.TopicPartition{Topic: &s.syncDeviceTopic, Partition: kafka.PartitionAny},
+			TopicPartition: kafka.TopicPartition{Topic: &s.fileConvertTopic, Partition: kafka.PartitionAny},
 			Key:            key,
 			Value:          msg,
 			Headers: []kafka.Header{{
 				Key:   string(event.TypeIdentifier),
-				Value: []byte(event.TypeSendMail),
+				Value: []byte(event.TypeConvertFile),
 			}},
 		}, nil)
 	}

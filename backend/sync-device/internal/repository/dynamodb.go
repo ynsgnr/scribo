@@ -64,6 +64,9 @@ func (ddb *dynamoRepo) ReadDevices(userID string) ([]*Device, error) {
 					Send: map[string]*Send{},
 				}
 			}
+			if values[value.DeviceID].Send == nil {
+				values[value.DeviceID].Send = map[string]*Send{}
+			}
 			values[value.DeviceID].Send[value.SyncID] = &value
 		} else {
 			value := Device{}

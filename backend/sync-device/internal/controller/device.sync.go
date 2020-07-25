@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"path"
 
 	"github.com/pkg/errors"
@@ -15,8 +16,12 @@ func (c *controller) SyncDevice(userID string, sync2Device *device.Sync2Device) 
 	if err != nil {
 		return nil, nil, err
 	}
+	if device.DeviceID == "" {
+		return nil, nil, fmt.Errorf("SyncDevice: unknown device for %s", sync2Device.SyncID)
+	}
 	fileID := uuid.NewV4().String()
 	sync2Device.FileID = fileID
+	sync2Device.SyncID = uuid.NewV4().String()
 	if path.Base(sync2Device.FileLocation) == device.FileTarget {
 		c.repository.WriteSend(&repository.Send{
 			Sync2Device: *sync2Device,
