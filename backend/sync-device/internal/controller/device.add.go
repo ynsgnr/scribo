@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/pkg/errors"
+	uuid "github.com/satori/go.uuid"
 	"github.com/ynsgnr/scribo/backend/common/schema/protobuf/generated/device"
 	"github.com/ynsgnr/scribo/backend/sync-device/internal/repository"
 )
@@ -12,6 +13,7 @@ var targetMap = map[device.DeviceType]string{
 
 func (c *controller) AddDevice(userID string, addDevice *device.AddDevice) (*device.AddDevice, error) {
 	fileTarget := targetMap[addDevice.DeviceType]
+	addDevice.DeviceID = uuid.NewV4().String()
 	err := c.repository.WriteDevice(&repository.Device{
 		AddDevice:  *addDevice,
 		FileTarget: fileTarget,

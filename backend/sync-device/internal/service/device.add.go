@@ -31,7 +31,7 @@ func (s *service) addDevice(key []byte, value []byte) {
 		Value:          msg,
 		Headers: []kafka.Header{{
 			Key:   string(event.TypeIdentifier),
-			Value: []byte(event.TypeAddDeviceSuccess),
+			Value: []byte(event.TypeAddDevice),
 		}},
 	}, nil)
 }
