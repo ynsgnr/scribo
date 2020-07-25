@@ -43,6 +43,7 @@ var (
 		},
 		UserID: "testUser",
 		State:  repository.StateWaitingSync,
+		Notes:  "testNote",
 	}
 )
 

@@ -9,6 +9,7 @@ type Device struct {
 	FileTarget string           `json:"fileTarget"`
 	UserID     string           `json:"userID"`
 	Send       map[string]*Send `json:"send"`
+	Notes      string           `json:"notes"`
 }
 
 type State string
@@ -16,6 +17,7 @@ type State string
 const (
 	StateWaitingFileConvert State = "waitingFileConvert"
 	StateWaitingSync        State = "waitingSync"
+	StateFailed             State = "failed"
 	StateDone               State = "done"
 )
 
@@ -23,6 +25,7 @@ type Send struct {
 	device.Sync2Device
 	UserID string `json:"userID"`
 	State  State  `json:"syncState"`
+	Notes  string `json:"notes"`
 }
 
 type Interface interface {
