@@ -36,7 +36,7 @@ func (s *service) syncDevice(key []byte, value []byte) {
 				Value: []byte(event.TypeSend2DeviceSuccess),
 			}},
 		}, nil)
-	} else {
+	} else if fileConvert != nil {
 		msg, err := proto.Marshal(fileConvert)
 		if err != nil {
 			logger.Printf(logger.Error, "syncDevice: controller.SyncDevice: Marshal: %s for %s", err.Error(), fileConvert.FileID)
