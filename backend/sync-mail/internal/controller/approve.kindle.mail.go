@@ -20,6 +20,7 @@ const (
 )
 
 func (c *controller) approveMail(message *imap.Message, section *imap.BodySectionName) error {
+	isProcessed := false
 	for _, from := range message.Envelope.From {
 		if from.MailboxName == mailBoxName && from.HostName == hostName {
 			r := message.GetBody(section)
@@ -59,9 +60,14 @@ func (c *controller) approveMail(message *imap.Message, section *imap.BodySectio
 					if err != nil {
 						return fmt.Errorf("approveMail: mail.Body.NextPart: Get Link: http.Get: %w", err)
 					}
+					isProcessed = true
 				}
 			}
 		}
 	}
-	return NotProcessed
+	if isProcessed {
+		return nil
+	} else {
+		return NotProcessed
+	}
 }
