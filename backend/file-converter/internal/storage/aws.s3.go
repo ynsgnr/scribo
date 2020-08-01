@@ -29,6 +29,10 @@ type storageS3 struct {
 
 func (storage *storageS3) DownloadFile(key string) (string, error) {
 	filePath := path.Join(storage.tmp, key)
+	err := os.Mkdir(storage.tmp, os.ModeDir)
+	if err != nil && !os.IsExist(err) {
+		return "", err
+	}
 	file, err := os.Create(filePath)
 	if err != nil {
 		return "", err
