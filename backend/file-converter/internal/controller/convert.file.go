@@ -5,8 +5,9 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"path/filepath"
+	"strings"
 
+	"github.com/ynsgnr/scribo/backend/common/logger"
 	"github.com/ynsgnr/scribo/backend/common/schema/protobuf/generated/file"
 )
 
@@ -16,13 +17,14 @@ func (c *controller) ConvertFile(file2convert *file.ConvertFile) (*file.ConvertF
 		return nil, err
 	}
 	//Get output path
-	fileName, _ := filepath.Split(path.Base(origFile))
+	fileName := strings.TrimSuffix(path.Base(origFile), path.Ext(path.Base(origFile)))
 	convertedFile := path.Join(path.Dir(origFile), fmt.Sprintf("%s.%s", fileName, file2convert.Target))
 	//Convert file
 	calibreConverter, err := exec.LookPath("ebook-convert")
 	if err != nil {
 		return nil, err
 	}
+	logger.Printf(logger.Info, "Commanding calibre: %s %s", origFile, convertedFile)
 	cmd := &exec.Cmd{
 		Path:   calibreConverter,
 		Args:   []string{origFile, convertedFile},
