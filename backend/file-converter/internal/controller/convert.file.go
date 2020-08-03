@@ -12,7 +12,7 @@ import (
 )
 
 func (c *controller) ConvertFile(file2convert *file.ConvertFile) (*file.ConvertFile, error) {
-	origFile, err := c.storage.DownloadFile(path.Base(file2convert.FileLocation))
+	origFile, err := c.storage.DownloadFile(file2convert.FileLocation)
 	if err != nil {
 		return nil, err
 	}
