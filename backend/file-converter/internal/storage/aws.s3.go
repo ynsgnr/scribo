@@ -28,7 +28,9 @@ type storageS3 struct {
 }
 
 func (storage *storageS3) DownloadFile(location string) (string, error) {
-	key := path.Base(location)
+	key, err := url.QueryUnescape(path.Base(location))
+	if err != nil {
+		retur
 	filePath := path.Join(storage.tmp, key)
 	err := os.Mkdir(storage.tmp, os.ModeDir)
 	if err != nil && !os.IsExist(err) {

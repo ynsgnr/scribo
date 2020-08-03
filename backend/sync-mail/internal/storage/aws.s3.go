@@ -2,6 +2,7 @@ package storage
 
 import (
 	"io"
+	"net/url"
 	"os"
 	"path"
 
@@ -28,9 +29,12 @@ type storageS3 struct {
 }
 
 func (storage *storageS3) DownloadFile(location string) (string, error) {
-	key := path.Base(location)
+	key, err := url.QueryUnescape(path.Base(location))
+	if err != nil {
+		return "", err
+	}
 	filePath := path.Join(storage.tmp, key)
-	err := os.Mkdir(storage.tmp, os.ModeDir)
+	err = os.Mkdir(storage.tmp, os.ModeDir)
 	if err != nil && !os.IsExist(err) {
 		return "", err
 	}

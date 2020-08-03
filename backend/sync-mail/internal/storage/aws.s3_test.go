@@ -20,7 +20,7 @@ func TestStorageS3(t *testing.T) {
 	ses := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
-	s3 := storage.NewStorageS3(s3manager.NewDownloader(ses), s3manager.NewUploader(ses), cfg.S3Bucket, cfg.TMPFolder)
+	s3 := storage.NewStorageS3(s3manager.NewDownloader(ses), s3manager.NewUploader(ses), cfg.S3Bucket, cfg.TempFolder)
 
 	//Create a file
 	tmpFile := path.Join(cfg.TempFolder, "test.md")
