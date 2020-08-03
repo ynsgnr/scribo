@@ -34,8 +34,8 @@ func New(ses *session.Session, source string) io.Writer {
 }
 
 // Write - write function parses and writes given bytes to cloudwatch
-func (l *cloudWatchWriter) Write(p []byte) (n int, err error) {
-	go func() {
+func (l *cloudWatchWriter) Write(data []byte) (n int, err error) {
+	go func(p []byte) {
 		//Parse log message
 		now := time.Now().Truncate(time.Microsecond).UTC()
 		logMessage := bytes.NewBuffer(p).String()
@@ -103,6 +103,6 @@ func (l *cloudWatchWriter) Write(p []byte) (n int, err error) {
 			fmt.Printf("ERROR: %s\n", output.GoString())
 		}
 		fmt.Println(message)
-	}()
-	return len(p), nil
+	}(data)
+	return len(data), nil
 }

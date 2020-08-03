@@ -60,16 +60,16 @@ github.com/jmespath/go-jmespath
 github.com/pkg/errors
 # github.com/satori/go.uuid v1.2.0
 github.com/satori/go.uuid
-# github.com/ynsgnr/scribo/backend/common v0.0.0-20200725154803-7796f20da59b
+# github.com/ynsgnr/scribo/backend/common v0.0.0-20200803200436-97a55ea4a7eb
 ## explicit
 github.com/ynsgnr/scribo/backend/common/schema/golang/event
 github.com/ynsgnr/scribo/backend/common/schema/protobuf/generated/file
-# github.com/ynsgnr/scribo/backend/common/configencoding v0.0.0-20200725154803-7796f20da59b
+# github.com/ynsgnr/scribo/backend/common/configencoding v0.0.0-20200803200436-97a55ea4a7eb
 ## explicit
 github.com/ynsgnr/scribo/backend/common/configencoding
 github.com/ynsgnr/scribo/backend/common/configencoding/parser
 github.com/ynsgnr/scribo/backend/common/configencoding/source
-# github.com/ynsgnr/scribo/backend/common/logger v0.0.0-20200725154803-7796f20da59b
+# github.com/ynsgnr/scribo/backend/common/logger v0.0.0-20200803200436-97a55ea4a7eb
 ## explicit
 github.com/ynsgnr/scribo/backend/common/logger
 # google.golang.org/protobuf v1.25.0
