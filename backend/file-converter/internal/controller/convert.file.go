@@ -20,17 +20,8 @@ func (c *controller) ConvertFile(file2convert *file.ConvertFile) (*file.ConvertF
 	fileName := strings.TrimSuffix(path.Base(origFile), path.Ext(path.Base(origFile)))
 	convertedFile := path.Join(path.Dir(origFile), fmt.Sprintf("%s.%s", fileName, file2convert.Target))
 	//Convert file
-	calibreConverter, err := exec.LookPath("ebook-convert")
-	if err != nil {
-		return nil, err
-	}
 	logger.Printf(logger.Info, "Commanding calibre: %s %s", origFile, convertedFile)
-	cmd := &exec.Cmd{
-		Path:   calibreConverter,
-		Args:   []string{origFile, convertedFile},
-		Stdout: os.Stdout,
-		Stderr: os.Stderr,
-	}
+	cmd := exec.Command("ebook-convert", origFile, convertedFile)
 	err = cmd.Run()
 	if err != nil {
 		return nil, err
