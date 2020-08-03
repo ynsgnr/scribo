@@ -9,7 +9,7 @@ import (
 type Interface interface {
 	AddDevice(*device.AddDevice) (*device.AddDevice, error)
 	SyncDevice(*device.Sync2Device) (*mail.SendMail, error)
-	SyncMailSend(*mail.SendMail) *device.Sync2Device
+	SyncMailSend(*mail.SendMail) (*device.Sync2Device, error)
 }
 
 func NewController(repository repository.Interface) Interface {

@@ -91,7 +91,7 @@ func (s *service) convertFileSuccess(key []byte, value []byte) {
 		Value:          msg,
 		Headers: []kafka.Header{{
 			Key:   string(event.TypeIdentifier),
-			Value: []byte(event.TypeSend2DeviceSuccess),
+			Value: []byte(event.TypeSend2Device),
 		}},
 	}, nil)
 }

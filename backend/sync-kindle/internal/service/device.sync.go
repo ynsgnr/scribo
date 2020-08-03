@@ -44,7 +44,11 @@ func (s *service) syncMailSuccess(key []byte, value []byte) {
 		logger.Printf(logger.Error, "syncMailSuccess: unmarshal: %s", err.Error())
 		return
 	}
-	addDevice := s.controller.SyncMailSend(email)
+	addDevice, err := s.controller.SyncMailSend(email)
+	if err != nil {
+		logger.Printf(logger.Error, "syncMailSuccess: controller.SyncMailSend: %s", err.Error())
+		return
+	}
 	msg, err := proto.Marshal(addDevice)
 	if err != nil {
 		logger.Printf(logger.Error, "syncMailSuccess: controller.AddDevice: Marshal: %s for %s", err.Error(), addDevice.DeviceID)

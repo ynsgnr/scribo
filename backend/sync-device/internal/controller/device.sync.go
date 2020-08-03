@@ -60,6 +60,7 @@ func (c *controller) ConvertFileSuccessfull(userID string, convertFile *file.Con
 	}
 	send.State = repository.StateWaitingSync
 	err = c.repository.WriteSend(send)
+	send.FileLocation = convertFile.FileLocation
 	return &send.Sync2Device, err
 }
 

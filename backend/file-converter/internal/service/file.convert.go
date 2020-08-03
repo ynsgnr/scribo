@@ -31,7 +31,7 @@ func (s *service) convertFile(key []byte, value []byte) {
 		Value:          msg,
 		Headers: []kafka.Header{{
 			Key:   string(event.TypeIdentifier),
-			Value: []byte(event.TypeSendMail),
+			Value: []byte(event.TypeConvertFileSuccess),
 		}},
 	}, nil)
 }
