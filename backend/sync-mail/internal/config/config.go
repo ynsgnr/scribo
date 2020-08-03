@@ -25,6 +25,7 @@ type Config struct {
 	ApproveKindlePeriod time.Duration `env:"APPROVE_KINDLE_PERIOD" default:"1m"`
 
 	TempFolder string `env:"KAFKA_OFFSET" default:"./tmp"`
+	S3Bucket   string `env:"STORAGE_S3_BUCKET" default:"fileconverter"`
 }
 
 func InitConfig() (Config, error) {

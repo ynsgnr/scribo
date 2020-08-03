@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/ynsgnr/scribo/backend/common/schema/protobuf/generated/mail"
+	"github.com/ynsgnr/scribo/backend/sync-mail/internal/storage"
 )
 
 type Interface interface {
@@ -19,6 +20,7 @@ func NewController(
 	usernameMail string,
 	passwordMail string,
 	from string,
+	storage storage.Interface,
 ) Interface {
 	return &controller{
 		downloadLocation: downloadLocation,
@@ -30,6 +32,7 @@ func NewController(
 		usernameMail:     usernameMail,
 		passwordMail:     passwordMail,
 		from:             from,
+		storage:          storage,
 	}
 }
 
@@ -43,4 +46,5 @@ type controller struct {
 	usernameMail     string
 	passwordMail     string
 	from             string
+	storage          storage.Interface
 }

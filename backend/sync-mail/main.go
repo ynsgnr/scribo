@@ -7,11 +7,13 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/ynsgnr/scribo/backend/common/logger"
 	"github.com/ynsgnr/scribo/backend/sync-mail/internal/config"
 	"github.com/ynsgnr/scribo/backend/sync-mail/internal/controller"
 	"github.com/ynsgnr/scribo/backend/sync-mail/internal/service"
+	"github.com/ynsgnr/scribo/backend/sync-mail/internal/storage"
 )
 
 const (
@@ -43,6 +45,7 @@ func main() {
 		panic(err)
 	}
 
+	storage := storage.NewStorageS3(s3manager.NewDownloader(ses), s3manager.NewUploader(ses), cfg.S3Bucket, cfg.TempFolder)
 	controller := controller.NewController(
 		cfg.TempFolder,
 		cfg.SMTPMailServer,
@@ -53,6 +56,7 @@ func main() {
 		cfg.UsernameMail,
 		cfg.PassMail,
 		cfg.From,
+		storage,
 	)
 	s := service.NewService(c, p, controller, cfg.EmailTopic, cfg.ApproveKindlePeriod)
 	OnShutDown(func() { s.Shutdown(time.Second) })
