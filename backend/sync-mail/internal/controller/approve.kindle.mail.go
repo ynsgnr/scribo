@@ -44,11 +44,11 @@ func (c *controller) approveMail(message *imap.Message, section *imap.BodySectio
 					}
 					body := string(b)
 					splitted := strings.Split(body, "<h3 class=\"verification-email-h3\">")
-					if len(splitted) < 1 {
+					if len(splitted) < 2 {
 						return fmt.Errorf("approveMail: mail.Body.NextPart: Parsing: h3 title parsing doesn't have enough length")
 					}
 					splitted = strings.Split(splitted[1], "<a href=\"")
-					if len(splitted) < 1 {
+					if len(splitted) < 2 {
 						return fmt.Errorf("approveMail: mail.Body.NextPart: Parsing: href link parsing doesn't have enough length")
 					}
 					splitted = strings.Split(splitted[1], "\" class=\"button\"")

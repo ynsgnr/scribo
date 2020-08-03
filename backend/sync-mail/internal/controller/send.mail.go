@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/ynsgnr/scribo/backend/common/logger"
 	"github.com/ynsgnr/scribo/backend/common/schema/protobuf/generated/mail"
 	"gopkg.in/gomail.v2"
 )
@@ -19,18 +20,23 @@ func (c *controller) SendMail(sendMail *mail.SendMail) (*mail.SendMail, error) {
 	m.SetHeader("From", from)
 	m.SetHeader("To", sendMail.To)
 
+	err := os.Mkdir(c.downloadLocation, os.ModeDir)
+	if err != nil && !os.IsExist(err) {
+		return nil, err
+	}
 	var filePath string
 	if sendMail.AttachmentLocation != "" {
+		logger.Printf(logger.Info, "SendMail: to %s : Downloading file: %s", sendMail.To, sendMail.AttachmentLocation)
 		filePath, err := c.downloadFile(sendMail.AttachmentLocation, c.downloadLocation)
 		if err != nil {
 			return nil, err
 		}
 		m.Attach(filePath)
+	} else {
+		logger.Printf(logger.Info, "SendMail: to %s : No file to download", sendMail.To)
 	}
 
-	d := gomail.NewDialer(c.smtpMailServer, c.smtpPort, c.usernameMail, c.passwordMail)
-
-	err := d.DialAndSend(m)
+	err = gomail.NewDialer(c.smtpMailServer, c.smtpPort, c.usernameMail, c.passwordMail).DialAndSend(m)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +52,7 @@ func (c *controller) downloadFile(url string, filepath string) (downloadedFilePa
 		return
 	}
 	downloadedFilePath = path.Join(filepath, path.Base(r.URL.Path))
-	out, err := os.Create(filepath)
+	out, err := os.Create(downloadedFilePath)
 	if err != nil {
 		return
 	}

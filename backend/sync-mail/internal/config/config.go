@@ -24,7 +24,7 @@ type Config struct {
 
 	ApproveKindlePeriod time.Duration `env:"APPROVE_KINDLE_PERIOD" default:"1m"`
 
-	TempFolder string `env:"KAFKA_OFFSET" default:"tmp"`
+	TempFolder string `env:"KAFKA_OFFSET" default:"./tmp"`
 }
 
 func InitConfig() (Config, error) {
