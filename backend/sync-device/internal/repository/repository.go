@@ -12,6 +12,12 @@ type Device struct {
 	Notes      string           `json:"notes"`
 }
 
+type DeviceQueryResult struct {
+	device.AddDevice
+	FileTarget string           `json:"fileTarget"`
+	Send       map[string]*Send `json:"send"`
+}
+
 type State string
 
 const (
@@ -34,6 +40,6 @@ type Interface interface {
 	GetSendByFileID(string, string) (*Send, error)
 	GetDevice(string, string) (*Device, error)
 	UpdateSendState(userID string, deviceID string, syncID string, state State) error
-	ReadDevices(string) ([]*Device, error)
+	ReadDevices(string) ([]*DeviceQueryResult, error)
 	DeleteDevice(*Device) error
 }

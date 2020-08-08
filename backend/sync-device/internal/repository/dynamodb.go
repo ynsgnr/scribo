@@ -35,7 +35,7 @@ type dynamoRepo struct {
 }
 
 // ReadDevices Read the whole device with send books data
-func (ddb *dynamoRepo) ReadDevices(userID string) ([]*Device, error) {
+func (ddb *dynamoRepo) ReadDevices(userID string) ([]*DeviceQueryResult, error) {
 	result, err := ddb.dbClient.Query(&dynamodb.QueryInput{
 		TableName:              aws.String(ddb.tableName),
 		KeyConditionExpression: aws.String(fmt.Sprintf("%s = :i ", dynamoUserID)),
@@ -48,7 +48,7 @@ func (ddb *dynamoRepo) ReadDevices(userID string) ([]*Device, error) {
 	if err != nil {
 		return nil, err
 	}
-	values := map[string]*Device{}
+	values := map[string]*DeviceQueryResult{}
 	for _, item := range result.Items {
 		if _, ok := item[dynamoItemID]; !ok {
 			return nil, errors.New("ReadDevices: item is missing deviceID")
@@ -60,7 +60,7 @@ func (ddb *dynamoRepo) ReadDevices(userID string) ([]*Device, error) {
 				return nil, err
 			}
 			if _, ok := values[value.DeviceID]; !ok {
-				values[value.DeviceID] = &Device{
+				values[value.DeviceID] = &DeviceQueryResult{
 					Send: map[string]*Send{},
 				}
 			}
@@ -69,7 +69,7 @@ func (ddb *dynamoRepo) ReadDevices(userID string) ([]*Device, error) {
 			}
 			values[value.DeviceID].Send[value.SyncID] = &value
 		} else {
-			value := Device{}
+			value := DeviceQueryResult{}
 			err = dynamodbattribute.UnmarshalMap(item, &value)
 			if err != nil {
 				return nil, err
@@ -80,7 +80,7 @@ func (ddb *dynamoRepo) ReadDevices(userID string) ([]*Device, error) {
 			values[value.DeviceID] = &value
 		}
 	}
-	returnValue := make([]*Device, 0, len(values))
+	returnValue := make([]*DeviceQueryResult, 0, len(values))
 	for _, d := range values {
 		if d.Send == nil {
 			d.Send = map[string]*Send{}

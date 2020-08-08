@@ -26,6 +26,14 @@ var (
 		UserID: "testUser",
 		Send:   map[string]*repository.Send{},
 	}
+	testDeviceReponse = &repository.DeviceQueryResult{
+		AddDevice: device.AddDevice{
+			DeviceName: "testDevice",
+			DeviceID:   "testDevice",
+			DeviceType: device.DeviceType_KINDLE,
+		},
+		Send: map[string]*repository.Send{},
+	}
 	testDevice2 = &repository.Device{
 		AddDevice: device.AddDevice{
 			DeviceName: "testDevice2",
@@ -34,6 +42,14 @@ var (
 		},
 		UserID: "testUser",
 		Send:   map[string]*repository.Send{},
+	}
+	testDevice2Reponse = &repository.DeviceQueryResult{
+		AddDevice: device.AddDevice{
+			DeviceName: "testDevice2",
+			DeviceID:   "testDevice2",
+			DeviceType: device.DeviceType_KINDLE,
+		},
+		Send: map[string]*repository.Send{},
 	}
 	testSend = &repository.Send{
 		Sync2Device: device.Sync2Device{
@@ -79,7 +95,7 @@ func TestDynamoDbCreateDevice(t *testing.T) {
 		return
 	}
 	actual := string(a)
-	e, err := json.Marshal(testDevice)
+	e, err := json.Marshal(testDeviceReponse)
 	if err != nil {
 		t.Error(err)
 		return
@@ -88,7 +104,7 @@ func TestDynamoDbCreateDevice(t *testing.T) {
 	if !strings.Contains(actual, expected) {
 		t.Errorf("\nExpected:%+v\nIn Actual:%+v", expected, actual)
 	}
-	e, err = json.Marshal(testDevice2)
+	e, err = json.Marshal(testDevice2Reponse)
 	if err != nil {
 		t.Error(err)
 		return
@@ -123,10 +139,10 @@ func TestDynamoDbCreateSend(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	testDevice.Send = map[string]*repository.Send{
+	testDeviceReponse.Send = map[string]*repository.Send{
 		testSend.SyncID: testSend,
 	}
-	e, err := json.Marshal(testDevice)
+	e, err := json.Marshal(testDeviceReponse)
 	if err != nil {
 		t.Error(err)
 		return
@@ -178,10 +194,10 @@ func TestDynamoDbCreateSend(t *testing.T) {
 		return
 	}
 	testSend.State = repository.StateDone
-	testDevice.Send = map[string]*repository.Send{
+	testDeviceReponse.Send = map[string]*repository.Send{
 		testSend.SyncID: testSend,
 	}
-	e, err = json.Marshal(testDevice)
+	e, err = json.Marshal(testDeviceReponse)
 	if err != nil {
 		t.Error(err)
 		return
