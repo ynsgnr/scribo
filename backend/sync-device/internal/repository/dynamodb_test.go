@@ -27,12 +27,10 @@ var (
 		Send:   map[string]*repository.Send{},
 	}
 	testDeviceReponse = &repository.DeviceQueryResult{
-		AddDevice: device.AddDevice{
-			DeviceName: "testDevice",
-			DeviceID:   "testDevice",
-			DeviceType: device.DeviceType_KINDLE,
-		},
-		Send: map[string]*repository.Send{},
+		DeviceName: "testDevice",
+		DeviceID:   "testDevice",
+		DeviceType: repository.Kindle,
+		Send:       map[string]*repository.SendQueryResult{},
 	}
 	testDevice2 = &repository.Device{
 		AddDevice: device.AddDevice{
@@ -44,12 +42,10 @@ var (
 		Send:   map[string]*repository.Send{},
 	}
 	testDevice2Reponse = &repository.DeviceQueryResult{
-		AddDevice: device.AddDevice{
-			DeviceName: "testDevice2",
-			DeviceID:   "testDevice2",
-			DeviceType: device.DeviceType_KINDLE,
-		},
-		Send: map[string]*repository.Send{},
+		DeviceName: "testDevice2",
+		DeviceID:   "testDevice2",
+		DeviceType: repository.Kindle,
+		Send:       map[string]*repository.SendQueryResult{},
 	}
 	testSend = &repository.Send{
 		Sync2Device: device.Sync2Device{
@@ -117,6 +113,7 @@ func TestDynamoDbCreateDevice(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	t.Logf("Actual:\n%+v", actual)
 	err = dynamoRepo.DeleteDevice(testDevice2)
 	if err != nil {
 		t.Error(err)
@@ -139,8 +136,12 @@ func TestDynamoDbCreateSend(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	testDeviceReponse.Send = map[string]*repository.Send{
-		testSend.SyncID: testSend,
+	testDeviceReponse.Send = map[string]*repository.SendQueryResult{
+		testSend.SyncID: {
+			SyncID:   testSend.SyncID,
+			DeviceID: testSend.DeviceID,
+			State:    testSend.State,
+		},
 	}
 	e, err := json.Marshal(testDeviceReponse)
 	if err != nil {
@@ -194,8 +195,12 @@ func TestDynamoDbCreateSend(t *testing.T) {
 		return
 	}
 	testSend.State = repository.StateDone
-	testDeviceReponse.Send = map[string]*repository.Send{
-		testSend.SyncID: testSend,
+	testDeviceReponse.Send = map[string]*repository.SendQueryResult{
+		testSend.SyncID: {
+			SyncID:   testSend.SyncID,
+			DeviceID: testSend.DeviceID,
+			State:    testSend.State,
+		},
 	}
 	e, err = json.Marshal(testDeviceReponse)
 	if err != nil {
@@ -221,7 +226,7 @@ func TestDynamoDbCreateSend(t *testing.T) {
 	if !strings.Contains(actual, expected) {
 		t.Errorf("Expected:\n%+v\nIn Actual:\n%+v", expected, actual)
 	}
-
+	t.Logf("Actual:\n%+v", actual)
 	err = dynamoRepo.DeleteDevice(testDevice)
 	if err != nil {
 		t.Error(err)
@@ -293,6 +298,7 @@ func TestDynamoDbGetCreate(t *testing.T) {
 	if !strings.Contains(actual, expected) {
 		t.Errorf("Expected:\n%+v\nIn Actual:\n%+v", expected, actual)
 	}
+	t.Logf("Actual:\n%+v", actual)
 	err = dynamoRepo.DeleteDevice(testDevice)
 	if err != nil {
 		t.Error(err)

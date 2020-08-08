@@ -54,18 +54,18 @@ func (ddb *dynamoRepo) ReadDevices(userID string) ([]*DeviceQueryResult, error) 
 			return nil, errors.New("ReadDevices: item is missing deviceID")
 		}
 		if strings.Contains(*item[dynamoItemID].S, dynamoSendType) {
-			value := Send{}
+			value := SendQueryResult{}
 			err = dynamodbattribute.UnmarshalMap(item, &value)
 			if err != nil {
 				return nil, err
 			}
 			if _, ok := values[value.DeviceID]; !ok {
 				values[value.DeviceID] = &DeviceQueryResult{
-					Send: map[string]*Send{},
+					Send: map[string]*SendQueryResult{},
 				}
 			}
 			if values[value.DeviceID].Send == nil {
-				values[value.DeviceID].Send = map[string]*Send{}
+				values[value.DeviceID].Send = map[string]*SendQueryResult{}
 			}
 			values[value.DeviceID].Send[value.SyncID] = &value
 		} else {
@@ -83,7 +83,7 @@ func (ddb *dynamoRepo) ReadDevices(userID string) ([]*DeviceQueryResult, error) 
 	returnValue := make([]*DeviceQueryResult, 0, len(values))
 	for _, d := range values {
 		if d.Send == nil {
-			d.Send = map[string]*Send{}
+			d.Send = map[string]*SendQueryResult{}
 		}
 		returnValue = append(returnValue, d)
 	}
