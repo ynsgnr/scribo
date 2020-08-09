@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
 	"github.com/julienschmidt/httprouter"
+	"github.com/ynsgnr/scribo/backend/authenticator/internal/blocker"
 	"github.com/ynsgnr/scribo/backend/authenticator/internal/config"
 )
 
@@ -17,6 +18,8 @@ type server struct {
 	cognitoUserPool         string
 	internalGeneratorSecret string
 	extrenalGeneratorSecret string
+
+	blocker blocker.Blocker
 }
 
 func NewServer(cognito *cognitoidentityprovider.CognitoIdentityProvider, cfg config.Config) (Server, error) {
@@ -25,5 +28,6 @@ func NewServer(cognito *cognitoidentityprovider.CognitoIdentityProvider, cfg con
 		cognito:         cognito,
 		cognitoClient:   cfg.ClientId,
 		cognitoUserPool: cfg.UserPoolId,
+		blocker:         blocker.NewBlocker(cfg.BlockerPeriod, cfg.BlockerCleanupPeriod),
 	}, nil
 }

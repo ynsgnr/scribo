@@ -37,6 +37,7 @@ func (s *server) handleSignIn(w http.ResponseWriter, r *http.Request, _ httprout
 	}
 	result, err := s.signIn(input, signInRequest.Base)
 	if err != nil {
+		s.blocker.CheckBlock(string(signInRequest.Email))
 		s.writeError(err, w)
 		return
 	}

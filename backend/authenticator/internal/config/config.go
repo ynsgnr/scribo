@@ -1,6 +1,8 @@
 package config
 
 import (
+	"time"
+
 	"github.com/ynsgnr/scribo/backend/common/configencoding"
 )
 
@@ -9,6 +11,9 @@ type Config struct {
 	UserPoolId              string `env:"USER_POOL_ID" validate:"required"`
 	InternalGeneratorSecret string `env:"INTERNAL_GENERATOR_SECRET" validate:"required"`
 	ExtrenalGeneratorSecret string `env:"EXTERNAL_GENERATOR_SECRET" validate:"required"`
+
+	BlockerPeriod        time.Duration `env:"BLOCKER_PERIOD" default:"100ms"`
+	BlockerCleanupPeriod time.Duration `env:"BLOCKER_PERIOD" default:"20s"`
 }
 
 func InitConfig() (Config, error) {

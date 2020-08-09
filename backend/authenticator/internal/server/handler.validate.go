@@ -17,6 +17,7 @@ func (s *server) handleValidate(w http.ResponseWriter, r *http.Request, _ httpro
 	authData := strings.Split(token, authenticator.HttpAuthType)
 	//Validate header
 	if len(authData) != 2 || authData[0] != "" || authData[1][0] != ' ' {
+		s.blocker.CheckBlock(token)
 		s.writeError(&cognitoidentityprovider.NotAuthorizedException{}, w)
 		return
 	}
@@ -25,6 +26,7 @@ func (s *server) handleValidate(w http.ResponseWriter, r *http.Request, _ httpro
 		AccessToken: aws.String(accessToken),
 	})
 	if err != nil || response.Username == nil {
+		s.blocker.CheckBlock(token)
 		s.writeError(&cognitoidentityprovider.NotAuthorizedException{}, w)
 		return
 	}
