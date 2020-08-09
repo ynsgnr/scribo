@@ -40,7 +40,7 @@ func main() {
 	commander := commander.NewKafkaCommander(p, cfg.CommandTopic)
 	authenticator := authenticator.NewAuthenticatorSDK("http://authenticator", http.DefaultClient)
 	authorizer := authenticate.NewAuthorizerMiddleware(authenticator)
-	s := service.NewService(commander, authorizer)
+	s := service.NewService(commander, authorizer, cfg.CrossOriginAllow, cfg.CrossOriginAllowCredentials, cfg.CrossOriginAllowMethods, cfg.CrossOriginAllowHeaders)
 	OnShutDown(func() { s.Shutdown(time.Second) })
 	s.Run()
 	//Wait for error logs to send

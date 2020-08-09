@@ -6,7 +6,13 @@ import (
 
 func (s *service) ListenAndServe() error {
 	// reverse proxy for other services
-	http.Handle("/", s.authorizer.Authenticate(s.handleProxy()))
+	http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Access-Control-Allow-Origin", s.crossOriginAllow)
+		w.Header().Add("Access-Control-Allow-Credentials", s.crossOriginAllowCredentials)
+		w.Header().Add("Access-Control-Allow-Methods", s.crossOriginAllowMethods)
+		w.Header().Add("Access-Control-Allow-Headers", s.crossOriginAllowHeaders)
+		s.authorizer.Authenticate(s.handleProxy()).ServeHTTP(w, r)
+	}))
 	// /command/v1/user/{{user-id}}/command
 	http.Handle("/command/v1/", s.authorizer.Authenticate(s.handleCommand()))
 

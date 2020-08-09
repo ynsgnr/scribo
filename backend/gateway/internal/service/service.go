@@ -15,11 +15,19 @@ type Interface interface {
 	Shutdown(time.Duration)
 }
 
-func NewService(commander commander.Interface, authorizer *authenticate.UserAuthenticator) Interface {
+func NewService(commander commander.Interface, authorizer *authenticate.UserAuthenticator,
+	crossOriginAllow string,
+	crossOriginAllowCredentials string,
+	crossOriginAllowMethods string,
+	crossOriginAllowHeaders string) Interface {
 	return &service{
-		commander:  commander,
-		authorizer: authorizer,
-		filter:     FilterTransport{},
+		commander:                   commander,
+		authorizer:                  authorizer,
+		filter:                      FilterTransport{},
+		crossOriginAllow:            crossOriginAllow,
+		crossOriginAllowCredentials: crossOriginAllowCredentials,
+		crossOriginAllowHeaders:     crossOriginAllowHeaders,
+		crossOriginAllowMethods:     crossOriginAllowMethods,
 	}
 }
 
@@ -27,6 +35,11 @@ type service struct {
 	commander  commander.Interface
 	authorizer *authenticate.UserAuthenticator
 	filter     http.RoundTripper
+
+	crossOriginAllow            string
+	crossOriginAllowCredentials string
+	crossOriginAllowMethods     string
+	crossOriginAllowHeaders     string
 
 	httpServer *http.Server
 }
