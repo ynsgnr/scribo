@@ -1,6 +1,6 @@
-import './scriboAuth.js'
-import './scriboFooter.js'
-import './scriboHeader.js'
+import './auth.js'
+import './footer.js'
+import './header.js'
 
 class App extends HTMLElement {
         constructor() {

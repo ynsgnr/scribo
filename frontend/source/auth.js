@@ -5,7 +5,7 @@ const UserKey = "userKey"
 const AccessTokenKey = "accessToken"
 const RefreshTokenKey = "refreshToken"
 const ExpireIn = 86400
-const endpoint = Baseurl+"/auth/user"
+const endpoint = Baseurl+"/authenticator/v1/user/session"
 
 class ScriboAuth extends HTMLElement {
     constructor() {
@@ -24,6 +24,15 @@ class ScriboAuth extends HTMLElement {
             <span id="ScriboLoginLoading" style="display:none;">Loading..</span>
         </div>
         `
+
+        //try logging with refresh token first
+        var refreshToken = cookie.getCookie(RefreshTokenKey)
+        var accessToken = cookie.getCookie(AccessTokenKey)
+        var username = cookie.getCookie(UserKey)
+        this.validate(accessToken).catch(()=>{
+            this.login(username,"",refreshToken)
+        })
+
         this.root = this.attachShadow({ mode: "open" });
         this.root.appendChild(template.content.cloneNode(true));
         this.emailInput = this.root.getElementById("ScriboAuthEmail")
@@ -31,7 +40,15 @@ class ScriboAuth extends HTMLElement {
         this.formElement = this.root.getElementById("ScriboLoginForm")
         this.loadingElement = this.root.getElementById("ScriboLoginLoading")
         this.messageElement = this.root.getElementById("ScriboErrorMessage")
-        this.root.getElementById("ScriboAuthLoginButton").addEventListener("click",()=>this.login(this.emailInput.value,this.passInput.value))
+        this.root.getElementById("ScriboAuthLoginButton").addEventListener("click",()=>{
+            this.loading()
+            this.login(this.emailInput.value,this.passInput.value)
+            .then(()=>this.signedIn())
+            .catch((err)=>{
+                this.displayMessage(err)
+                this.done()
+            })
+        })
     }
 
     connectedCallback() {
@@ -39,31 +56,48 @@ class ScriboAuth extends HTMLElement {
     }
 
     login(username, password, token){
-        this.loading()
-        fetch(endpoint,{method: 'PUT', credentials: 'same-origin',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            "email":username,
-            "pass":password,
-            "token":token,
-        })}).then(response=>{
-            if (response.status == 403){
-                throw"Username or password is wrong"
-            }
-            return response.json()
-        }).then(data=>this.setToken(username, data))
-        .then(()=>this.signedIn())
-        .then(()=>{
-            event = document.createEvent("HTMLEvents");
-            event.initEvent("signedin", true, true);
-            this.dispatchEvent(event);
-        })
-        .catch((err)=>{
-            this.displayMessage(err)
-            this.done()
-        })
+        if (username != "" && username!= null) {
+            return fetch(endpoint,{method: 'PUT', credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                "email":username,
+                "pass":password,
+                "token":token,
+            })}).then(response=>{
+                if (response.status == 403){
+                    throw"Username or password is wrong"
+                }
+                return response.json()
+            }).then(data=>this.setToken(username, data))
+            .then(()=>{
+                event = document.createEvent("HTMLEvents");
+                event.initEvent("signedin", true, true);
+                this.dispatchEvent(event);
+            })
+        }
+        return new Promise()
+    }
+
+    validate(token){
+        if (token != "" && token != null){
+            return fetch(endpoint,{method: 'GET', credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer '+token,
+            }}).then(response=>{
+                if (response.status != 204){
+                    throw"Username or password is wrong"
+                }
+            })
+            .then(()=>{
+                event = document.createEvent("HTMLEvents");
+                event.initEvent("signedin", true, true);
+                this.dispatchEvent(event);
+            })
+        }
+        return new Promise()
     }
     
     displayMessage(msg){
@@ -89,8 +123,8 @@ class ScriboAuth extends HTMLElement {
     }
 
     setToken(username, data){
-        cookie.setCookie(AccessTokenKey,data.AccessToken)
-        cookie.setCookie(RefreshTokenKey,data.RefreshToken, ExpireIn)
+        cookie.setCookie(AccessTokenKey,data.token)
+        cookie.setCookie(RefreshTokenKey,data.refreshToken, ExpireIn)
         cookie.setCookie(UserKey, username, ExpireIn)
     }
     
