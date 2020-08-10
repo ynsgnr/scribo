@@ -7,7 +7,7 @@ services:
     volumes:
       - ${home}/.aws:/home/.aws
     ports:
-      - "80:80"
+      - "81:80"
   authenticator:
     image: authenticator:latest
     env_file: 

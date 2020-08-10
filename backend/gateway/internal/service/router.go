@@ -14,7 +14,13 @@ func (s *service) ListenAndServe() error {
 		s.authorizer.Authenticate(s.handleProxy()).ServeHTTP(w, r)
 	}))
 	// /command/v1/user/{{user-id}}/command
-	http.Handle("/command/v1/", s.authorizer.Authenticate(s.handleCommand()))
+	http.Handle("/command/v1/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Access-Control-Allow-Origin", s.crossOriginAllow)
+		w.Header().Add("Access-Control-Allow-Credentials", s.crossOriginAllowCredentials)
+		w.Header().Add("Access-Control-Allow-Methods", s.crossOriginAllowMethods)
+		w.Header().Add("Access-Control-Allow-Headers", s.crossOriginAllowHeaders)
+		s.authorizer.Authenticate(s.handleCommand()).ServeHTTP(w, r)
+	}))
 
 	s.httpServer = &http.Server{Addr: ":80", Handler: http.DefaultServeMux}
 	return s.httpServer.ListenAndServe()
