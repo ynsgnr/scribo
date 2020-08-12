@@ -12,8 +12,9 @@ type Config struct {
 	InternalGeneratorSecret string `env:"INTERNAL_GENERATOR_SECRET" validate:"required"`
 	ExtrenalGeneratorSecret string `env:"EXTERNAL_GENERATOR_SECRET" validate:"required"`
 
-	BlockerPeriod        time.Duration `env:"BLOCKER_PERIOD" default:"100ms"`
-	BlockerCleanupPeriod time.Duration `env:"BLOCKER_PERIOD" default:"20s"`
+	BlockerPeriod             time.Duration `env:"BLOCKER_PERIOD" default:"100ms"`
+	BlockerCleanupPeriod      time.Duration `env:"BLOCKER_PERIOD" default:"20s"`
+	BlockerThrottleAfterTries int           `env:"BLOCKER_THROTTLE_AFTER" default:"5"`
 }
 
 func InitConfig() (Config, error) {

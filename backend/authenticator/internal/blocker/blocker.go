@@ -10,67 +10,49 @@ type Blocker interface {
 }
 
 type blocker struct {
-	tryCount     map[string]int64
-	tryMutex     map[string]*sync.Mutex
-	generalMutex *sync.RWMutex
-	period       time.Duration
-	cleanPeriod  time.Duration
+	tryCount           map[string]int64
+	mutex              *sync.Mutex
+	period             time.Duration
+	cleanPeriod        time.Duration
+	throttleAfterTries int64
 }
 
-func NewBlocker(period time.Duration, cleanPeriod time.Duration) Blocker {
+func NewBlocker(period time.Duration, cleanPeriod time.Duration, throttleAfterTries int64) Blocker {
 	b := &blocker{
-		tryCount:     make(map[string]int64),
-		tryMutex:     make(map[string]*sync.Mutex),
-		generalMutex: &sync.RWMutex{},
-		period:       period,
-		cleanPeriod:  cleanPeriod,
+		tryCount:           make(map[string]int64),
+		mutex:              &sync.Mutex{},
+		period:             period,
+		cleanPeriod:        cleanPeriod,
+		throttleAfterTries: throttleAfterTries,
 	}
 	go b.clean()
 	return b
 }
 
 func (b *blocker) CheckBlock(key string) {
-	b.generalMutex.RLock()
-	tryMutex, ok := b.tryMutex[key]
-	if !ok {
-		tryMutex = &sync.Mutex{}
-		b.generalMutex.RUnlock()
-		b.generalMutex.Lock()
-		b.tryMutex[key] = tryMutex
-		b.generalMutex.Unlock()
-		b.generalMutex.RLock()
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+	tries := b.tryCount[key]
+	b.tryCount[key]++
+	if tries >= b.throttleAfterTries {
+		timeout := b.period * time.Duration(tries)
+		time.Sleep(timeout)
 	}
-	defer b.generalMutex.RUnlock()
-	tryMutex.Lock()
-	defer tryMutex.Unlock()
-	count := b.tryCount[key]
-	b.tryCount[key] = count + 1
-	time.Sleep(b.period * time.Duration(count))
 }
 
 func (b *blocker) clean() {
 	t := time.NewTicker(b.cleanPeriod)
 	for {
 		<-t.C
-		deleteMutexes := make([]string, len(b.tryMutex))
-		for k, m := range b.tryMutex {
-			go func(key string, mutex *sync.Mutex) {
-				mutex.Lock()
-				defer mutex.Unlock()
-				if count, ok := b.tryCount[key]; ok {
-					if count == 0 {
-						delete(b.tryCount, key)
-						deleteMutexes = append(deleteMutexes, key)
-					} else {
-						b.tryCount[key] = count - 1
-					}
+		for k, v := range b.tryCount {
+			go func(key string, v int64) {
+				b.mutex.Lock()
+				defer b.mutex.Unlock()
+				b.tryCount[key] = v - 1
+				if v == 0 {
+					delete(b.tryCount, key)
 				}
-			}(k, m)
+			}(k, v)
 		}
-		b.generalMutex.Lock()
-		for _, key := range deleteMutexes {
-			delete(b.tryMutex, key)
-		}
-		b.generalMutex.Unlock()
 	}
 }

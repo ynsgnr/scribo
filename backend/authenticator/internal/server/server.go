@@ -28,6 +28,6 @@ func NewServer(cognito *cognitoidentityprovider.CognitoIdentityProvider, cfg con
 		cognito:         cognito,
 		cognitoClient:   cfg.ClientId,
 		cognitoUserPool: cfg.UserPoolId,
-		blocker:         blocker.NewBlocker(cfg.BlockerPeriod, cfg.BlockerCleanupPeriod),
+		blocker:         blocker.NewBlocker(cfg.BlockerPeriod, cfg.BlockerCleanupPeriod, int64(cfg.BlockerThrottleAfterTries)),
 	}, nil
 }
