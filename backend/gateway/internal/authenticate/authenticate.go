@@ -28,7 +28,7 @@ func (am *UserAuthenticator) Authenticate(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
-		if service[0] == authenticator.ServiceName {
+		if service[0] == authenticator.ServiceName || r.Method == http.MethodOptions {
 			//allow authenticator access without authorization
 			next.ServeHTTP(w, r)
 			return

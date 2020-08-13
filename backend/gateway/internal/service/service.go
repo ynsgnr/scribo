@@ -19,7 +19,8 @@ func NewService(commander commander.Interface, authorizer *authenticate.UserAuth
 	crossOriginAllow string,
 	crossOriginAllowCredentials string,
 	crossOriginAllowMethods string,
-	crossOriginAllowHeaders string) Interface {
+	crossOriginAllowHeaders string,
+	crossOriginExposeHeaders string) Interface {
 	return &service{
 		commander:                   commander,
 		authorizer:                  authorizer,
@@ -28,6 +29,7 @@ func NewService(commander commander.Interface, authorizer *authenticate.UserAuth
 		crossOriginAllowCredentials: crossOriginAllowCredentials,
 		crossOriginAllowHeaders:     crossOriginAllowHeaders,
 		crossOriginAllowMethods:     crossOriginAllowMethods,
+		crossOriginExposeHeaders:    crossOriginExposeHeaders,
 	}
 }
 
@@ -40,6 +42,7 @@ type service struct {
 	crossOriginAllowCredentials string
 	crossOriginAllowMethods     string
 	crossOriginAllowHeaders     string
+	crossOriginExposeHeaders    string
 
 	httpServer *http.Server
 }
