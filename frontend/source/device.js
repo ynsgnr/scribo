@@ -1,3 +1,5 @@
+import {GetDevices} from './api.js'
+
 class ScriboDevice extends HTMLElement {
     constructor() {
         super();
@@ -11,6 +13,10 @@ class ScriboDevice extends HTMLElement {
         `
         let shadowRoot = this.attachShadow({ mode: "open" });
         shadowRoot.appendChild(template.content.cloneNode(true));
+    }
+
+    connectedCallback(){
+        GetDevices().then((result)=>{console.log(result)})
     }
 }
 window.customElements.define("scribo-device", ScriboDevice);

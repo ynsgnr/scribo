@@ -2,7 +2,8 @@ import * as cookie from './cookie.js'
 import {Baseurl} from './config.js'
 
 const UserKey = "userKey"
-const AccessTokenKey = "accessToken"
+export const UserIDKey = "userIDKey"
+export const AccessTokenKey = "accessToken"
 const RefreshTokenKey = "refreshToken"
 const ExpireIn = 86400
 const endpoint = Baseurl+"/authenticator/v1/user/session"
@@ -10,6 +11,7 @@ const endpoint = Baseurl+"/authenticator/v1/user/session"
 class ScriboAuth extends HTMLElement {
     constructor() {
         super();
+        this.refreshToken()
         let template = document.createElement("template")
         template.innerHTML = `
         <div style = "width:100%; height:100%; flex:1;">
@@ -24,14 +26,7 @@ class ScriboAuth extends HTMLElement {
             <span id="ScriboLoginLoading" style="display:none;">Loading..</span>
         </div>
         `
-
-        //try logging with refresh token first
-        var refreshToken = cookie.getCookie(RefreshTokenKey)
-        var accessToken = cookie.getCookie(AccessTokenKey)
-        var username = cookie.getCookie(UserKey)
-        this.validate(accessToken).catch(()=>{
-            this.login(username,"",refreshToken)
-        })
+        this.intervalID = setInterval(this.refreshToken.bind(this), ExpireIn-200);
 
         this.root = this.attachShadow({ mode: "open" });
         this.root.appendChild(template.content.cloneNode(true));
@@ -51,13 +46,13 @@ class ScriboAuth extends HTMLElement {
         })
     }
 
-    connectedCallback() {
-        this.refreshToken()
+    disconnectedCallback() {
+        clearInterval(this.intervalID)
     }
 
     login(username, password, token){
         if (username != "" && username!= null) {
-            return fetch(endpoint,{method: 'PUT', credentials: 'same-origin',
+            return fetch(endpoint,{method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -67,29 +62,31 @@ class ScriboAuth extends HTMLElement {
                 "token":token,
             })}).then(response=>{
                 if (response.status == 403){
-                    throw"Username or password is wrong"
+                    throw "Username or password is wrong"
                 }
                 return response.json()
-            }).then(data=>this.setToken(username, data))
+            }).then(data=>{this.setToken(username, data);return data})
+            .then(data=>this.validate(data.token)
             .then(()=>{
                 event = document.createEvent("HTMLEvents");
                 event.initEvent("signedin", true, true);
                 this.dispatchEvent(event);
-            })
+            }))
         }
-        return new Promise()
     }
 
     validate(token){
         if (token != "" && token != null){
-            return fetch(endpoint,{method: 'GET', credentials: 'same-origin',
+            return fetch(endpoint,{method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer '+token,
-            }}).then(response=>{
+            }
+            }).then(response=>{
                 if (response.status != 204){
                     throw"Username or password is wrong"
                 }
+                cookie.setCookie(UserIDKey, response.headers.get("User"))
             })
             .then(()=>{
                 event = document.createEvent("HTMLEvents");
@@ -97,7 +94,6 @@ class ScriboAuth extends HTMLElement {
                 this.dispatchEvent(event);
             })
         }
-        return new Promise()
     }
     
     displayMessage(msg){
@@ -131,7 +127,7 @@ class ScriboAuth extends HTMLElement {
     refreshToken(){
         let userName = cookie.getCookie(UserKey)
         let refreshToken = cookie.getCookie(RefreshTokenKey)
-        if (refreshToken && userName){
+        if (refreshToken && userName && refreshToken!="" && userName!=""){
             this.login(userName, "", refreshToken)
         }
     }

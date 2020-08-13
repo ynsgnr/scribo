@@ -1,6 +1,9 @@
 import './auth.js'
 import './footer.js'
+import './device.js'
 import './header.js'
+
+import * as cookie from './cookie.js'
 
 class App extends HTMLElement {
         constructor() {
@@ -29,17 +32,16 @@ class App extends HTMLElement {
             <div id="scribo-app" style = "min-height: 100%; width:100%;">
                 <scribo-header></scribo-header>
                 <div style = "margin: 0 auto; text-align: center; overflow:auto; height:100%; ">
-                    <span>App</span>
+                    <scribo-device></scribo-device>
                 </div>
                 <scribo-footer></scribo-footer>
             </div>
             `
-            this.appPage = this.appTemplate.content.cloneNode(true)
         }
 
         signedIn(){
-            this.root.removeChild(this.loginPage)
-            this.root.appendChild(this.appPage)
+            this.loginPage.style.display="none"
+            this.root.appendChild(this.appTemplate.content.cloneNode(true))
             this.appPage = this.root.getElementById("scribo-app")
         }
     }
