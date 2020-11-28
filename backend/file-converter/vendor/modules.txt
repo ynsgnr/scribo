@@ -1,4 +1,4 @@
-# github.com/aws/aws-sdk-go v1.33.17
+# github.com/aws/aws-sdk-go v1.35.35
 ## explicit
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/arn
@@ -21,7 +21,9 @@ github.com/aws/aws-sdk-go/aws/session
 github.com/aws/aws-sdk-go/aws/signer/v4
 github.com/aws/aws-sdk-go/internal/context
 github.com/aws/aws-sdk-go/internal/ini
-github.com/aws/aws-sdk-go/internal/s3err
+github.com/aws/aws-sdk-go/internal/s3shared
+github.com/aws/aws-sdk-go/internal/s3shared/arn
+github.com/aws/aws-sdk-go/internal/s3shared/s3err
 github.com/aws/aws-sdk-go/internal/sdkio
 github.com/aws/aws-sdk-go/internal/sdkmath
 github.com/aws/aws-sdk-go/internal/sdkrand
@@ -42,34 +44,33 @@ github.com/aws/aws-sdk-go/private/protocol/restxml
 github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
 github.com/aws/aws-sdk-go/service/cloudwatchlogs
 github.com/aws/aws-sdk-go/service/s3
-github.com/aws/aws-sdk-go/service/s3/internal/arn
 github.com/aws/aws-sdk-go/service/s3/s3iface
 github.com/aws/aws-sdk-go/service/s3/s3manager
 github.com/aws/aws-sdk-go/service/sts
 github.com/aws/aws-sdk-go/service/sts/stsiface
-# github.com/confluentinc/confluent-kafka-go v1.4.2
+# github.com/confluentinc/confluent-kafka-go v1.5.2
 ## explicit
 github.com/confluentinc/confluent-kafka-go/kafka
 github.com/confluentinc/confluent-kafka-go/kafka/librdkafka
-# github.com/golang/protobuf v1.4.2
+# github.com/golang/protobuf v1.4.3
 ## explicit
 github.com/golang/protobuf/proto
-# github.com/jmespath/go-jmespath v0.3.0
+# github.com/jmespath/go-jmespath v0.4.0
 github.com/jmespath/go-jmespath
 # github.com/pkg/errors v0.9.1
 github.com/pkg/errors
 # github.com/satori/go.uuid v1.2.0
 github.com/satori/go.uuid
-# github.com/ynsgnr/scribo/backend/common v0.0.0-20200803200436-97a55ea4a7eb
+# github.com/ynsgnr/scribo/backend/common v0.0.0-20200818080702-5f5f4769d02e
 ## explicit
 github.com/ynsgnr/scribo/backend/common/schema/golang/event
 github.com/ynsgnr/scribo/backend/common/schema/protobuf/generated/file
-# github.com/ynsgnr/scribo/backend/common/configencoding v0.0.0-20200803200436-97a55ea4a7eb
+# github.com/ynsgnr/scribo/backend/common/configencoding v0.0.0-20200818080702-5f5f4769d02e
 ## explicit
 github.com/ynsgnr/scribo/backend/common/configencoding
 github.com/ynsgnr/scribo/backend/common/configencoding/parser
 github.com/ynsgnr/scribo/backend/common/configencoding/source
-# github.com/ynsgnr/scribo/backend/common/logger v0.0.0-20200803200436-97a55ea4a7eb
+# github.com/ynsgnr/scribo/backend/common/logger v0.0.0-20200818080702-5f5f4769d02e
 ## explicit
 github.com/ynsgnr/scribo/backend/common/logger
 # google.golang.org/protobuf v1.25.0
