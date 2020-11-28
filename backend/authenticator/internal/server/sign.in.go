@@ -19,25 +19,13 @@ func (s *server) handleSignIn(w http.ResponseWriter, r *http.Request, _ httprout
 		s.writeError(JSONMarshallError{err}, w)
 		return
 	}
-	input := &cognitoidentityprovider.AdminInitiateAuthInput{
-		ClientId:   aws.String(s.cognitoClient),
-		UserPoolId: aws.String(s.cognitoUserPool),
-	}
-	if signInRequest.Password != "" {
-		input.AuthFlow = aws.String(cognitoidentityprovider.AuthFlowTypeAdminUserPasswordAuth)
-		input.AuthParameters = map[string]*string{
-			"USERNAME": aws.String(string(signInRequest.Email)),
-			"PASSWORD": aws.String(string(signInRequest.Password)),
-		}
-	} else {
-		input.AuthFlow = aws.String(cognitoidentityprovider.AuthFlowTypeRefreshToken)
-		input.AuthParameters = map[string]*string{
-			"REFRESH_TOKEN": aws.String(string(signInRequest.Token)),
-		}
-	}
-	result, err := s.signIn(input, signInRequest.Base)
+	result, err := s.signIn(signInRequest.Base)
 	if err != nil {
 		s.blocker.CheckBlock(string(signInRequest.Email))
+		s.writeError(err, w)
+		return
+	}
+	if result.ChallengeName != nil {
 		s.writeError(err, w)
 		return
 	}
@@ -69,18 +57,27 @@ func (s *server) handleSignIn(w http.ResponseWriter, r *http.Request, _ httprout
 	_, _ = w.Write(body)
 }
 
-func (s *server) signIn(input *cognitoidentityprovider.AdminInitiateAuthInput, signInRequest authenticator.Base) (*cognitoidentityprovider.AdminInitiateAuthOutput, error) {
-	result, err := s.cognito.AdminInitiateAuth(input)
+func (s *server) signIn(input authenticator.Base) (*cognitoidentityprovider.AdminInitiateAuthOutput, error) {
+	cognitoInput := &cognitoidentityprovider.AdminInitiateAuthInput{
+		ClientId:   aws.String(s.cognitoClient),
+		UserPoolId: aws.String(s.cognitoUserPool),
+		AuthFlow:   aws.String(cognitoidentityprovider.AuthFlowTypeRefreshToken),
+		AuthParameters: map[string]*string{
+			"REFRESH_TOKEN": aws.String(string(input.Token)),
+		},
+	}
+	if input.Token == "" {
+		cognitoInput.AuthFlow = aws.String(cognitoidentityprovider.AuthFlowTypeAdminUserPasswordAuth)
+		cognitoInput.AuthParameters = map[string]*string{
+			"USERNAME": aws.String(string(input.Email)),
+			"PASSWORD": aws.String(string(input.Password)),
+		}
+		input.Email = "token-sign-in"
+	}
+	result, err := s.cognito.AdminInitiateAuth(cognitoInput)
 	if err != nil {
-		logger.Printf(logger.Error, " (%s) signIn: cognito.AdminInitiateAuth: %s", signInRequest.Email, err.Error())
+		logger.Printf(logger.Error, " (%s) signIn: cognito.AdminInitiateAuth: %s", input.Email, err.Error())
 		return nil, err
-	}
-	if result.ChallengeName != nil {
-		return nil, AuthChallengeException{}
-	}
-	if result.AuthenticationResult == nil {
-		logger.Printf(logger.Error, " (%s) signIn: result.AuthenticationResult is nul. result: %+v", signInRequest.Email, result)
-		return nil, errors.New("auth result is nul")
 	}
 	return result, nil
 }

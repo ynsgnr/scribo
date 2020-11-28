@@ -17,18 +17,6 @@ func (s *server) handleSignOut(w http.ResponseWriter, r *http.Request, _ httprou
 		s.writeError(JSONMarshallError{err}, w)
 		return
 	}
-	_, err = s.signIn(&cognitoidentityprovider.AdminInitiateAuthInput{
-		ClientId:   aws.String(s.cognitoClient),
-		UserPoolId: aws.String(s.cognitoUserPool),
-		AuthFlow:   aws.String(cognitoidentityprovider.AuthFlowTypeRefreshToken),
-		AuthParameters: map[string]*string{
-			"REFRESH_TOKEN": aws.String(string(signOutRequest.Token)),
-		},
-	}, signOutRequest.Base)
-	if err != nil {
-		s.writeError(err, w)
-		return
-	}
 	_, err = s.cognito.AdminUserGlobalSignOut(&cognitoidentityprovider.AdminUserGlobalSignOutInput{
 		UserPoolId: aws.String(s.cognitoUserPool),
 		Username:   aws.String(string(signOutRequest.Email)),

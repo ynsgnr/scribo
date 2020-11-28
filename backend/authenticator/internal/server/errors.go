@@ -7,9 +7,28 @@ import (
 )
 
 type UserExistsException struct{ error }
+
+func (UserExistsException) Error() string {
+	return "UserExistsException"
+}
+
 type AuthChallengeException struct{ error }
+
+func (AuthChallengeException) Error() string {
+	return "AuthChallengeException"
+}
+
 type JSONMarshallError struct{ error }
+
+func (JSONMarshallError) Error() string {
+	return "JSONMarshallError"
+}
+
 type NotImplemented struct{ error }
+
+func (NotImplemented) Error() string {
+	return "NotImplemented"
+}
 
 func (s *server) writeError(err error, w http.ResponseWriter) {
 	switch err.(type) {

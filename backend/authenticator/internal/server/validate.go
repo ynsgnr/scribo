@@ -13,20 +13,16 @@ import (
 )
 
 func (s *server) handleValidate(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	token := r.Header.Get(authenticator.HttpAuthHeader)
-	authData := strings.Split(token, authenticator.HttpAuthType)
-	//Validate header
-	if len(authData) != 2 || authData[0] != "" || authData[1][0] != ' ' {
-		s.blocker.CheckBlock(token)
+	accessToken := s.getAuthToken(r)
+	if accessToken == "" {
 		s.writeError(&cognitoidentityprovider.NotAuthorizedException{}, w)
 		return
 	}
-	accessToken := authData[1][1:]
 	response, err := s.cognito.GetUser(&cognitoidentityprovider.GetUserInput{
-		AccessToken: aws.String(accessToken),
+		AccessToken: aws.String(string(accessToken)),
 	})
 	if err != nil || response.Username == nil {
-		s.blocker.CheckBlock(token)
+		s.blocker.CheckBlock(string(accessToken))
 		s.writeError(&cognitoidentityprovider.NotAuthorizedException{}, w)
 		return
 	}
@@ -38,4 +34,20 @@ func (s *server) handleValidate(w http.ResponseWriter, r *http.Request, _ httpro
 	w.Header().Add(authenticator.HttpInternalUserIDHeader, internalID)
 	w.Header().Add(authenticator.HttpUserIDHeader, externalID)
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (s *server) getAuthToken(r *http.Request) authenticator.Token {
+	token := r.Header.Get(authenticator.HttpAuthHeader)
+	authData := strings.Split(token, authenticator.HttpAuthType)
+	//Validate header
+	if len(authData) != 2 || authData[1][0] != ' ' {
+		IP := "0.0.0.0"
+		IPs := strings.Split(r.Header.Get(authenticator.HttpForwardedHeader), ",")
+		if len(IPs) != 0 && len(IPs[0]) != 0 {
+			IP = IPs[0]
+		}
+		s.blocker.CheckBlock(IP)
+		return ""
+	}
+	return authenticator.Token(authData[1][1:])
 }

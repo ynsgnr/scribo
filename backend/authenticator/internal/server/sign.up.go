@@ -19,6 +19,8 @@ func (s *server) handleSignUp(w http.ResponseWriter, r *http.Request, _ httprout
 		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
+
+	// Create User
 	_, err = s.cognito.AdminCreateUser(&cognitoidentityprovider.AdminCreateUserInput{
 		MessageAction:     aws.String(cognitoidentityprovider.MessageActionTypeSuppress), //Resend the sign up message if user already exists
 		Username:          aws.String(string(signUpRequest.Email)),
@@ -36,21 +38,15 @@ func (s *server) handleSignUp(w http.ResponseWriter, r *http.Request, _ httprout
 		logger.Printf(logger.Error, "handleSignUp: cognito.AdminCreateUser: %s", err.Error())
 		return
 	}
-	sesData, err := s.cognito.AdminInitiateAuth(&cognitoidentityprovider.AdminInitiateAuthInput{
-		AuthFlow:   aws.String(cognitoidentityprovider.AuthFlowTypeAdminUserPasswordAuth),
-		ClientId:   aws.String(s.cognitoClient),
-		UserPoolId: aws.String(s.cognitoUserPool),
-		AuthParameters: map[string]*string{
-			"USERNAME": aws.String(string(signUpRequest.Email)),
-			"PASSWORD": aws.String(string(signUpRequest.Password)),
-		},
-	})
+
+	// Skip force password change challenge
+	sesData, err := s.signIn(signUpRequest.Base)
 	if _, ok := err.(*cognitoidentityprovider.NotAuthorizedException); ok {
 		s.writeError(err, w)
 		return
 	} else if err != nil {
 		s.writeError(err, w)
-		logger.Printf(logger.Error, "handleSignUp: cognito.AdminInitiateAuth: %s", err.Error())
+		logger.Printf(logger.Error, "handleSignUp: s.signIn: %s", err.Error())
 		return
 	}
 	_, err = s.cognito.AdminRespondToAuthChallenge(&cognitoidentityprovider.AdminRespondToAuthChallengeInput{
@@ -69,6 +65,21 @@ func (s *server) handleSignUp(w http.ResponseWriter, r *http.Request, _ httprout
 	} else if err != nil {
 		s.writeError(err, w)
 		logger.Printf(logger.Error, "handleSignUp: cognito.AdminRespondToAuthChallenge: %s", err.Error())
+		return
+	}
+	authOutput, err := s.signIn(signUpRequest.Base)
+	if err != nil {
+		s.writeError(err, w)
+		logger.Printf(logger.Error, "handleSignUp: s.signIn: %s", err.Error())
+		return
+	}
+	_, err = s.cognito.GetUserAttributeVerificationCode(&cognitoidentityprovider.GetUserAttributeVerificationCodeInput{
+		AccessToken:   authOutput.AuthenticationResult.AccessToken,
+		AttributeName: aws.String("email"),
+	})
+	if err != nil {
+		s.writeError(err, w)
+		logger.Printf(logger.Error, "handleSignUp: cognito.sendVerificationEmail: %s", err.Error())
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
