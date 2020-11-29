@@ -1,9 +1,10 @@
 import * as cookie from './cookie.js'
 import {Baseurl} from './config.js'
 
-const UserKey = "userKey"
+export const UserKey = "userKey"
 export const UserIDKey = "userIDKey"
 export const AccessTokenKey = "accessToken"
+export const IDTokenKey = "idToken"
 const RefreshTokenKey = "refreshToken"
 const ExpireIn = 86400
 const endpoint = Baseurl+"/authenticator/v1/user/session"
@@ -122,6 +123,7 @@ class ScriboAuth extends HTMLElement {
         cookie.setCookie(AccessTokenKey,data.token)
         cookie.setCookie(RefreshTokenKey,data.refreshToken, ExpireIn)
         cookie.setCookie(UserKey, username, ExpireIn)
+        cookie.setCookie(IDTokenKey, data.idToken, ExpireIn)
     }
     
     refreshToken(){

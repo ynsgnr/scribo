@@ -2,6 +2,7 @@ import './auth.js'
 import './footer.js'
 import './device.js'
 import './header.js'
+import './file.js'
 
 import * as cookie from './cookie.js'
 
@@ -33,6 +34,7 @@ class App extends HTMLElement {
                 <scribo-header></scribo-header>
                 <div style = "margin: 0 auto; text-align: center; overflow:auto; height:100%; ">
                     <scribo-device></scribo-device>
+                    <file-uploader></file-uploader>
                 </div>
                 <scribo-footer></scribo-footer>
             </div>
