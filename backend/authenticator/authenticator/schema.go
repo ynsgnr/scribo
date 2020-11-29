@@ -26,6 +26,7 @@ type ResetPassRequest struct {
 }
 
 type SignInResponse struct {
+	IDToken      Token `json:"idToken,omitempty"`
 	Token        Token `json:"token,omitempty"`
 	RefreshToken Token `json:"refreshToken,omitempty"`
 	ExpiresIn    int64 `json:"expiresIn,omitempty"`

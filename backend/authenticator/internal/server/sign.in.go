@@ -36,13 +36,18 @@ func (s *server) handleSignIn(w http.ResponseWriter, r *http.Request, _ httprout
 	}
 	accessToken := authenticator.Token("")
 	refreshToken := authenticator.Token("")
+	idToken := authenticator.Token("")
 	if result.AuthenticationResult.AccessToken != nil {
 		accessToken = authenticator.Token(*result.AuthenticationResult.AccessToken)
 	}
 	if result.AuthenticationResult.RefreshToken != nil {
 		refreshToken = authenticator.Token(*result.AuthenticationResult.RefreshToken)
 	}
+	if result.AuthenticationResult.IdToken != nil {
+		idToken = authenticator.Token(*result.AuthenticationResult.IdToken)
+	}
 	signInResponse := authenticator.SignInResponse{
+		IDToken:      idToken,
 		Token:        accessToken,
 		RefreshToken: refreshToken,
 		ExpiresIn:    *result.AuthenticationResult.ExpiresIn,

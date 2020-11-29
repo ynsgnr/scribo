@@ -11,5 +11,5 @@ func (s *server) ListenAndServe() error {
 	s.router.PUT("/authenticator/v1/user/session", s.handleSignIn)
 	s.router.GET("/authenticator/v1/user/session", s.handleValidate)
 
-	return http.ListenAndServe(":81", s.router)
+	return http.ListenAndServe(":80", s.router)
 }
