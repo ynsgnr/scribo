@@ -1,5 +1,5 @@
 
-import {upload} from './file.upload.js'
+import {upload} from './api.file.upload.js'
 
 class FileUploader extends HTMLElement {
     constructor() {
