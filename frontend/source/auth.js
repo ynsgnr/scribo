@@ -11,6 +11,7 @@ const endpoint = Baseurl+"/authenticator/v1/user/session"
 
 class ScriboAuth extends HTMLElement {
     constructor() {
+        console.log("ScriboAuth constructor")
         super();
         this.refreshToken()
         let template = document.createElement("template")
@@ -63,16 +64,12 @@ class ScriboAuth extends HTMLElement {
                 "token":token,
             })}).then(response=>{
                 if (response.status == 403){
+                    this.dispatchEvent(new CustomEvent("authrequired"))
                     throw "Username or password is wrong"
                 }
                 return response.json()
             }).then(data=>{this.setToken(username, data);return data})
-            .then(data=>this.validate(data.token)
-            .then(()=>{
-                event = document.createEvent("HTMLEvents");
-                event.initEvent("signedin", true, true);
-                this.dispatchEvent(event);
-            }))
+            .then(data=>this.validate(data.token))
         }
     }
 
@@ -85,14 +82,13 @@ class ScriboAuth extends HTMLElement {
             }
             }).then(response=>{
                 if (response.status != 204){
-                    throw"Username or password is wrong"
+                    this.dispatchEvent(new CustomEvent("authrequired"))
+                    throw "Username or password is wrong"
                 }
                 cookie.setCookie(UserIDKey, response.headers.get("User"))
             })
             .then(()=>{
-                event = document.createEvent("HTMLEvents");
-                event.initEvent("signedin", true, true);
-                this.dispatchEvent(event);
+                this.dispatchEvent(new CustomEvent("signedin"))
             })
         }
     }
@@ -130,8 +126,13 @@ class ScriboAuth extends HTMLElement {
         let userName = cookie.getCookie(UserKey)
         let refreshToken = cookie.getCookie(RefreshTokenKey)
         if (refreshToken && userName && refreshToken!="" && userName!=""){
+            console.log("refresh token 1")
             this.login(userName, "", refreshToken)
+        }else{
+            console.log("refresh token 2")
+            this.dispatchEvent(new CustomEvent("authrequired"))
         }
+
     }
 }
 window.customElements.define("scribo-auth", ScriboAuth);
