@@ -9,7 +9,7 @@ class FileUploader extends HTMLElement {
         <input id="fileUpload" type="file" accept=".azw,.azw3,.azw4,.cbz,.cbr,.cbc,.chm,.djvu,.docx,.epub,.fb2,.fbz,.html,.htmlz,.lit,.lrf,.mobi,.odt,.pdf,.prc,.pdb,.pml,.rb,.rtf,.snb,.tcr,.txt,.txtz">
         `
         let shadowRoot = this.attachShadow({ mode: "open" });
-        shadowRoot.appendChild(template.content.cloneNode(true));
+        shadowRoot.appendChild(template.content);
         this.fileUploadInput = shadowRoot.getElementById("fileUpload")
         this.fileUploadInput.addEventListener("change",()=>{this.fileUpload(this.fileUploadInput.files)})
     }

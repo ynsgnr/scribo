@@ -22,18 +22,18 @@ class App extends HTMLElement {
                 </div>
                 <div style = "display:none; margin: 0 auto; text-align: center; overflow:auto; height:100%;" id="app">
                     <scribo-device></scribo-device>
-                    <file-uploader></file-uploader>
                 </div>
                 <scribo-footer></scribo-footer>
             </div>
             `
-            this.root.appendChild(this.appTemplate.content.cloneNode(true))
-            this.authElem =  this.root.getElementById("scribo-auth")
-            this.login =  this.root.getElementById("login")
-            this.app = this.root.getElementById("app")
+            this.authElem =  this.appTemplate.content.getElementById("scribo-auth")
+            this.login =  this.appTemplate.content.getElementById("login")
+            this.app = this.appTemplate.content.getElementById("app")
             
-            this.authElem.addEventListener("signedin",()=>{this.app.style.removeProperty("display");this.login.style.display="none";})
+            this.authElem.addEventListener("signedin",()=>{this.app.style.removeProperty("display")})
             this.authElem.addEventListener("authrequired",()=>{this.login.style.removeProperty("display")})
+
+            this.root.appendChild(this.appTemplate.content)
         }
     }
 window.customElements.define("app-main", App);

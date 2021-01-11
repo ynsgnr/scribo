@@ -10,7 +10,7 @@ class ScriboSync extends HTMLElement {
         </ul> 
         `
         let shadowRoot = this.attachShadow({ mode: "open" });
-        shadowRoot.appendChild(template.content.cloneNode(true));
+        shadowRoot.appendChild(template.content);
     }
 }
 window.customElements.define("scribo-sync", ScriboSync);

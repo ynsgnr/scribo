@@ -29,14 +29,12 @@ class ScriboAuth extends HTMLElement {
         `
         this.intervalID = setInterval(this.refreshToken.bind(this), ExpireIn-200);
 
-        this.root = this.attachShadow({ mode: "open" });
-        this.root.appendChild(template.content.cloneNode(true));
-        this.emailInput = this.root.getElementById("ScriboAuthEmail")
-        this.passInput = this.root.getElementById("ScriboAuthPassword")
-        this.formElement = this.root.getElementById("ScriboLoginForm")
-        this.loadingElement = this.root.getElementById("ScriboLoginLoading")
-        this.messageElement = this.root.getElementById("ScriboErrorMessage")
-        this.root.getElementById("ScriboAuthLoginButton").addEventListener("click",()=>{
+        this.emailInput = template.content.getElementById("ScriboAuthEmail")
+        this.passInput = template.content.getElementById("ScriboAuthPassword")
+        this.formElement = template.content.getElementById("ScriboLoginForm")
+        this.loadingElement = template.content.getElementById("ScriboLoginLoading")
+        this.messageElement = template.content.getElementById("ScriboErrorMessage")
+        template.content.getElementById("ScriboAuthLoginButton").addEventListener("click",()=>{
             this.loading()
             this.login(this.emailInput.value,this.passInput.value)
             .then(()=>this.signedIn())
@@ -45,6 +43,9 @@ class ScriboAuth extends HTMLElement {
                 this.done()
             })
         })
+
+        this.root = this.attachShadow({ mode: "open" });
+        this.root.appendChild(template.content);
     }
 
     disconnectedCallback() {
