@@ -11,7 +11,6 @@ const endpoint = Baseurl+"/authenticator/v1/user/session"
 
 class ScriboAuth extends HTMLElement {
     constructor() {
-        console.log("ScriboAuth constructor")
         super();
         this.refreshToken()
         let template = document.createElement("template")
@@ -126,10 +125,8 @@ class ScriboAuth extends HTMLElement {
         let userName = cookie.getCookie(UserKey)
         let refreshToken = cookie.getCookie(RefreshTokenKey)
         if (refreshToken && userName && refreshToken!="" && userName!=""){
-            console.log("refresh token 1")
             this.login(userName, "", refreshToken)
         }else{
-            console.log("refresh token 2")
             this.dispatchEvent(new CustomEvent("authrequired"))
         }
 

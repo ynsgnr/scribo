@@ -1,4 +1,4 @@
 
-const Baseurl = "http://localhost:81"
+const Baseurl = "http://localhost"
 
 export {Baseurl}
