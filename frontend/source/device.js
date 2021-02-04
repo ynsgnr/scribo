@@ -36,8 +36,9 @@ class ScriboDevice extends HTMLElement {
             this.error.style.removeProperty("display")
             this.error.innerHTML="<p>Failed to load data<p/>"
         }
-        this.content.style.removeProperty("display")
+        this.error.style.display="none"
         this.loading.style.display="none"
+        this.content.style.removeProperty("display")
     }
 
     connectedCallback(){
