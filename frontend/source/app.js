@@ -30,7 +30,7 @@ class App extends HTMLElement {
             this.login =  this.appTemplate.content.getElementById("login")
             this.app = this.appTemplate.content.getElementById("app")
             
-            this.authElem.addEventListener("signedin",()=>{this.app.style.removeProperty("display")})
+            this.authElem.addEventListener("signedin",()=>{this.app.style.removeProperty("display");this.login.style.display="none";})
             this.authElem.addEventListener("authrequired",()=>{this.login.style.removeProperty("display")})
 
             this.root.appendChild(this.appTemplate.content)

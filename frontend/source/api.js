@@ -8,17 +8,21 @@ const getDevicesEndpoint = Baseurl+"/sync-device/v1/user/:userID/devices"
 const userIDKey = ":userID"
 
 export function GetDevices(){
-    return fetch(getDevicesEndpoint.replace(userIDKey,cookie.getCookie(auth.UserIDKey)),
-    {method: 'GET',
-    headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer '+ cookie.getCookie(auth.AccessTokenKey),
-    }}).then(response=>{
-        if (response.status != 200){
-            throw "Can't get resources right now"
-        }
-        return response.json()
-    })
+    let userID = cookie.getCookie(auth.UserIDKey)
+    if (userID != null){
+        return fetch(getDevicesEndpoint.replace(userIDKey,userID),
+        {method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer '+ cookie.getCookie(auth.AccessTokenKey),
+        }}).then(response=>{
+            if (response.status != 200){
+                throw "Can't get resources right now"
+            }
+            return response.json()
+        })
+    }
+    return Promise.resolve()
 }
 
 export function AddDevice(deviceName, type, data){
