@@ -64,13 +64,23 @@ class ScriboAuth extends HTMLElement {
                 "token":token,
             })}).then(response=>{
                 if (response.status == 403){
-                    this.dispatchEvent(new CustomEvent("authrequired"))
+                    this.dispatchEvent(new Event("authrequired",{composed: true}))
                     throw "Username or password is wrong"
                 }
                 return response.json()
             }).then(data=>{this.setToken(username, data);return data})
             .then(data=>this.validate(data.token))
         }
+    }
+
+    signOut(username){
+        return fetch(endpoint,{method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                "email":username
+            })})
     }
 
     validate(token){
@@ -82,13 +92,13 @@ class ScriboAuth extends HTMLElement {
             }
             }).then(response=>{
                 if (response.status != 204){
-                    this.dispatchEvent(new CustomEvent("authrequired"))
+                    this.dispatchEvent(new Event("authrequired",{composed: true}))
                     throw "Username or password is wrong"
                 }
                 cookie.setCookie(UserIDKey, response.headers.get("User"))
             })
             .then(()=>{
-                this.dispatchEvent(new CustomEvent("signedin"))
+                this.dispatchEvent(new Event("signedin",{composed: true}))
             })
         }
     }
@@ -111,6 +121,7 @@ class ScriboAuth extends HTMLElement {
     }
 
     done(){
+        this.messageElement.innerHTML = ""
         this.formElement.style.display = "block"
         this.loadingElement.style.display = "none"
     }
@@ -128,7 +139,7 @@ class ScriboAuth extends HTMLElement {
         if (refreshToken && userName && refreshToken!="" && userName!=""){
             this.login(userName, "", refreshToken)
         }else{
-            this.dispatchEvent(new CustomEvent("authrequired"))
+            this.dispatchEvent(new Event("authrequired",{composed: true}))
         }
 
     }
