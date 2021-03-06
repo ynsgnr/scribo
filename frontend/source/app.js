@@ -37,7 +37,6 @@ class App extends HTMLElement {
             this.header.addEventListener("signout",()=>{
                 this.authElem.signOut(cookie.getCookie(UserKey))
                 .then(()=>{
-                    this.authElem.done();
                     this.app.style.display = "none";this.login.style.removeProperty("display")})})
 
             this.authElem.addEventListener("signedin",(e)=>{
@@ -47,7 +46,6 @@ class App extends HTMLElement {
             )
             this.authElem.addEventListener("authrequired",()=>{
                 this.app.innerHTML = ""
-                this.authElem.done();
                 this.app.style.display = "none";this.login.style.removeProperty("display")})
 
             this.root.appendChild(this.appTemplate.content)

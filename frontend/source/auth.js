@@ -12,7 +12,6 @@ const endpoint = Baseurl+"/authenticator/v1/user/session"
 class ScriboAuth extends HTMLElement {
     constructor() {
         super();
-        this.refreshToken()
         let template = document.createElement("template")
         template.innerHTML = `
         <div style = "width:100%; height:100%; flex:1;">
@@ -39,10 +38,10 @@ class ScriboAuth extends HTMLElement {
             this.login(this.emailInput.value,this.passInput.value)
             .then(()=>this.signedIn())
             .catch((err)=>{
-                this.displayMessage(err)
-                this.done()
+                this.completed(err)
             })
         })
+        this.refreshToken()
 
         this.root = this.attachShadow({ mode: "open" });
         this.root.appendChild(template.content);
@@ -80,7 +79,7 @@ class ScriboAuth extends HTMLElement {
             },
             body: JSON.stringify({
                 "email":username
-            })})
+            })}).then(()=>this.completed)
     }
 
     validate(token){
@@ -103,9 +102,12 @@ class ScriboAuth extends HTMLElement {
         }
     }
     
-    displayMessage(msg){
-        this.messageElement.style.display = "block"
-        this.messageElement.innerHTML = msg
+    completed(msg){
+        if (msg){
+            this.messageElement.innerHTML = msg
+            this.messageElement.style.display = "block"
+        }
+        this.loadingElement.style.display = "none"
     }
 
     loading(){
@@ -118,12 +120,6 @@ class ScriboAuth extends HTMLElement {
         this.formElement.style.display = "none"
         this.messageElement.style.display = "block"
         this.messageElement.innerHTML = "Signed In"
-    }
-
-    done(){
-        this.messageElement.innerHTML = ""
-        this.formElement.style.display = "block"
-        this.loadingElement.style.display = "none"
     }
 
     setToken(username, data){
@@ -139,9 +135,9 @@ class ScriboAuth extends HTMLElement {
         if (refreshToken && userName && refreshToken!="" && userName!=""){
             this.login(userName, "", refreshToken)
         }else{
+            this.completed()
             this.dispatchEvent(new Event("authrequired",{composed: true}))
         }
-
     }
 }
 window.customElements.define("scribo-auth", ScriboAuth);
