@@ -108,6 +108,7 @@ class ScriboAuth extends HTMLElement {
             this.messageElement.style.display = "block"
         }
         this.loadingElement.style.display = "none"
+        this.formElement.style.display = "block"
     }
 
     loading(){
