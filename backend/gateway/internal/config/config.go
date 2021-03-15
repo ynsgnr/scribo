@@ -11,7 +11,7 @@ type Config struct {
 
 	CrossOriginAllow            string `env:"CROSS-ORIGIN-ALLOW" default:"http://localhost"`
 	CrossOriginAllowCredentials string `env:"CROSS-ORIGIN-ALLOW-CRED" default:"true"`
-	CrossOriginAllowMethods     string `env:"CROSS-ORIGIN-ALLOW-METHODS" default:"GET, PUT, POST, DELETE, PATCH, HEAD"`
+	CrossOriginAllowMethods     string `env:"CROSS-ORIGIN-ALLOW-METHODS" default:"GET, PUT, POST, DELETE, PATCH, HEAD, OPTIONS"`
 	CrossOriginAllowHeaders     string `env:"CROSS-ORIGIN-ALLOW-HEADERS" default:"EventType, Content-Type, Authorization"`
 	CrossOriginExposeHeaders    string `env:"CROSS-ORIGIN-EXPOSE-HEADERS" default:"User"`
 }

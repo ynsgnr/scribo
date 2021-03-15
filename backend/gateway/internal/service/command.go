@@ -14,6 +14,11 @@ import (
 
 func (s *service) handleCommand() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			w.Header().Add("Allow", "POST")
+			w.WriteHeader(http.StatusOK)
+			return
+		}
 		if r.Method != http.MethodPost {
 			logger.Printf(logger.Trace, "handleCommand: wrong method: %s", r.Method)
 			w.WriteHeader(http.StatusMethodNotAllowed)
