@@ -1,5 +1,9 @@
 import {GetDevices} from './api.js'
 
+import './device.add.js'
+import {Popup} from './basic.popup.js'
+import './device.element.js'
+
 class ScriboDevice extends HTMLElement {
     constructor() {
         super();
@@ -14,9 +18,9 @@ class ScriboDevice extends HTMLElement {
                 <div style = "display:flex; margin: 0 auto; text-align: center; overflow:auto; height:100%;">
                     <div style = "flex:1;">
                         <p>Devices</p>
-                        <div style = "text-align: left; id="device-list">
+                        <div style = "text-align: left; padding:5%;" id="device-list">
                         </div>
-                        <button class="add-device" type="button">
+                        <button class="add-device" type="button" id="add-device">
                             + Add a device
                         </button>
                     </div>
@@ -27,21 +31,29 @@ class ScriboDevice extends HTMLElement {
             </div>
         </div>
         `
-        this.root = template.content
-        this.loading = this.root.getElementById("loading-display")
-        this.error = this.root.getElementById("error-display")
-        this.content = this.root.getElementById("content")
-        this.deviceList = this.root.getElementById("device-list")
+        let root = template.content
+        this.loading = root.getElementById("loading-display")
+        this.error = root.getElementById("error-display")
+        this.content = root.getElementById("content")
+        this.deviceList = root.getElementById("device-list")
+        this.addDeviceButton = root.getElementById("add-device")
+
+        this.deviceAdd = document.createElement("device-add") //singleton
+        this.addDeviceButton.onclick = ()=>{this.popup = Popup(this.shadowRoot,this.deviceAdd)}
+        this.deviceAdd.addEventListener("deviceadded",()=>{this.updateWithAPI().then(()=>{this.popup && this.popup.remove()})})
+
+        this.deviceElements = []
+
         let shadowRoot = this.attachShadow({ mode: "open" });
-        shadowRoot.appendChild(this.root);
+        shadowRoot.appendChild(root);
         this.addEventListener("signedin",()=>{this.signOutButton.style.removeProperty("display")})
     }
 
-    loaded(showError){
-        if (showError){
+    loadedWithError(error){
+        if (error){
             this.loading.style.display="none"
             this.error.style.removeProperty("display")
-            this.error.innerHTML="<p>Failed to load data<p/>"
+            this.error.innerHTML="<p>"+error+"<p/>"
         }
         this.error.style.display="none"
         this.loading.style.display="none"
@@ -50,20 +62,48 @@ class ScriboDevice extends HTMLElement {
 
     update(data){
         if (!data){
-            this.loaded(true)
-            return
+            this.loadedWithError("Failed to load data")
+            return Promise.resolve()
         }
-        console.log(data)
-        //this.deviceList.appendChild()
-        this.loaded(false)
+        data.sort( (a,b)=> a.deviceName<b.deviceName ? -1 : a.deviceName>b.deviceName ? 1 : 0);
+        for (var i=0;i<data.length;i++){
+            console.log(data[i])
+            if (i<this.deviceElements.length){
+                this.deviceElements[i].setAttribute("name",data[i].deviceName)
+                this.deviceElements[i].setAttribute("type",data[i].deviceType)
+            }else{
+                let deviceElement = document.createElement("device-element")
+                deviceElement.setAttribute("name",data[i].deviceName)
+                deviceElement.setAttribute("type",data[i].deviceType)
+                this.deviceElements.push(deviceElement)
+                this.deviceList.appendChild(deviceElement)
+                console.log(deviceElement)
+            }
+        }
+        if (i<this.deviceElements.length){
+            for (var k = i; k<this.deviceElements.length; k++){
+                console.log(this.deviceElements[k])
+                this.deviceList.removeChild(this.deviceElements[k])
+            }
+            console.log(this.deviceElements)
+            this.deviceElements = this.deviceElements.slice(0,i)
+            console.log(this.deviceElements)
+        }
+        this.loadedWithError(null)
+        return Promise.resolve()
+    }
+
+    updateWithAPI(){
+        return GetDevices().then((result)=>{this.update(result)})
     }
 
     connectedCallback(){
-        GetDevices().then((result)=>{this.update(result)})
+        this.updateWithAPI()
     }
       
     adoptedCallback() {
-        GetDevices().then((result)=>{this.update(result)})
+        this.updateWithAPI()
     }
+
 }
 window.customElements.define("scribo-device", ScriboDevice);
