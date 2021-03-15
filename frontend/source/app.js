@@ -14,8 +14,8 @@ class App extends HTMLElement {
 
             this.appTemplate = document.createElement("template")
             this.appTemplate.innerHTML = `
+            <scribo-header id="header"></scribo-header>
             <div style="min-height: 100%; width:100%;">
-                <scribo-header id="header"></scribo-header>
                 <div style = "display:none; margin: 0 auto; text-align: center; overflow:auto; height:100%;" id="login">
                     <div style = "float: right; width:30%; height:100%; padding: 1%; overflow:auto;">
                         <scribo-auth id="scribo-auth"></scribo-auth>
@@ -23,8 +23,8 @@ class App extends HTMLElement {
                 </div>
                 <div style = "display:none; margin: 0 auto; text-align: center; overflow:auto; height:100%;" id="app">
                 </div>
-                <scribo-footer></scribo-footer>
             </div>
+            <scribo-footer></scribo-footer>
             `
 
             this.authElem =  this.appTemplate.content.getElementById("scribo-auth")
