@@ -68,7 +68,10 @@ class ScriboAuth extends HTMLElement {
                 }
                 return response.json()
             }).then(data=>{this.setToken(username, data);return data})
-            .then(data=>this.validate(data.token))
+            .then(data=>this.validate(data.token)
+            .then(()=>{
+                this.dispatchEvent(new Event("signedin",{composed: true}))
+            }))
         }
     }
 
@@ -95,9 +98,6 @@ class ScriboAuth extends HTMLElement {
                     throw "Username or password is wrong"
                 }
                 cookie.setCookie(UserIDKey, response.headers.get("User"))
-            })
-            .then(()=>{
-                this.dispatchEvent(new Event("signedin",{composed: true}))
             })
         }
     }
