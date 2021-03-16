@@ -11,11 +11,13 @@ type BlockerTest struct {
 	b                   Blocker
 	key                 string
 	minimumExpectedTime time.Duration
+	err                 error
 }
 
 func TestBlocker(t *testing.T) {
 	period := time.Millisecond
 	cleanPeriod := 20 * time.Millisecond
+	maxWaitPeriod := 100 * time.Millisecond
 	tryCount := int64(2)
 	key1 := "testKey1"
 	key2 := "testKey2"
@@ -31,7 +33,7 @@ func TestBlocker(t *testing.T) {
 	wg.Add(1)
 	go RunTest(channel2, wg)
 
-	b := NewBlocker(period, cleanPeriod, tryCount)
+	b := NewBlocker(period, cleanPeriod, maxWaitPeriod, tryCount)
 
 	for i := 0; i < tryCount1; i++ {
 		expectedTime := period * time.Duration(i)
@@ -75,10 +77,51 @@ func TestBlocker(t *testing.T) {
 	wg.Wait()
 }
 
+func TestBlockerMaxWait(t *testing.T) {
+	period := time.Millisecond
+	cleanPeriod := 100 * time.Millisecond
+	maxWaitPeriod := 5 * time.Millisecond
+	tryCount := int64(2)
+	key := "testKey"
+	tryCount1 := 5
+
+	wg := &sync.WaitGroup{}
+
+	channel := make(chan BlockerTest, tryCount)
+	wg.Add(1)
+	go RunTest(channel, wg)
+
+	b := NewBlocker(period, cleanPeriod, maxWaitPeriod, tryCount)
+
+	for i := 0; i < tryCount1; i++ {
+		expectedTime := period * time.Duration(i)
+		if int64(i) < tryCount {
+			expectedTime = time.Duration(0)
+		}
+		channel <- BlockerTest{
+			t:                   t,
+			b:                   b,
+			key:                 key,
+			minimumExpectedTime: expectedTime,
+		}
+	}
+	channel <- BlockerTest{
+		t:   t,
+		b:   b,
+		key: key,
+		err: ErrLongWaitPeriod,
+	}
+	close(channel)
+	wg.Wait()
+}
+
 func RunTest(channel chan BlockerTest, wg *sync.WaitGroup) {
 	for test := range channel {
 		start := time.Now()
-		test.b.CheckBlock(test.key)
+		err := test.b.CheckBlock(test.key)
+		if err != test.err {
+			test.t.Errorf("For %s: Expected error %v got %v", test.key, test.err, err)
+		}
 		timePassed := time.Since(start) + time.Microsecond
 		if timePassed-test.minimumExpectedTime < 0 {
 			test.t.Errorf("For %s should have taken more than %s, took %s", test.key, test.minimumExpectedTime.String(), timePassed.String())
