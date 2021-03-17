@@ -26,6 +26,9 @@ class ScriboDevice extends HTMLElement {
                     </div>
                     <div style = "flex:5;">
                         <p>Previous Syncs</p>
+                        <div id="prevsyncs">
+                        </div>
+                        <p style="color:gray;">Drag and drop file to send</p>
                     </div>
                 </div>
             </div>
@@ -54,10 +57,22 @@ class ScriboDevice extends HTMLElement {
             this.loading.style.display="none"
             this.error.style.removeProperty("display")
             this.error.innerHTML="<p>"+error+"<p/>"
+        }else{
+            this.error.style.display="none"
+            this.loading.style.display="none"
+            this.content.style.removeProperty("display")
         }
-        this.error.style.display="none"
-        this.loading.style.display="none"
-        this.content.style.removeProperty("display")
+    }
+
+    
+    elementOnclick(element){
+        if (element && element != this.selectedDevice){
+            if(this.selectedDevice){
+                this.selectedDevice.removeAttribute("selected")
+            }
+            element.setAttribute("selected","true")
+            this.selectedDevice = element
+        }
     }
 
     update(data){
@@ -67,34 +82,33 @@ class ScriboDevice extends HTMLElement {
         }
         data.sort( (a,b)=> a.deviceName<b.deviceName ? -1 : a.deviceName>b.deviceName ? 1 : 0);
         for (var i=0;i<data.length;i++){
-            console.log(data[i])
             if (i<this.deviceElements.length){
+                this.deviceElements[i].setAttribute("id",data[i].deviceID)
                 this.deviceElements[i].setAttribute("name",data[i].deviceName)
                 this.deviceElements[i].setAttribute("type",data[i].deviceType)
+                this.deviceElements[i].onclick = (event)=>{this.elementOnclick(event.target)}
             }else{
                 let deviceElement = document.createElement("device-element")
+                deviceElement.setAttribute("id",data[i].deviceID)
                 deviceElement.setAttribute("name",data[i].deviceName)
                 deviceElement.setAttribute("type",data[i].deviceType)
                 this.deviceElements.push(deviceElement)
+                this.deviceElements[i].onclick = (event)=>{this.elementOnclick(event.target)}
                 this.deviceList.appendChild(deviceElement)
-                console.log(deviceElement)
             }
         }
         if (i<this.deviceElements.length){
             for (var k = i; k<this.deviceElements.length; k++){
-                console.log(this.deviceElements[k])
                 this.deviceList.removeChild(this.deviceElements[k])
             }
-            console.log(this.deviceElements)
             this.deviceElements = this.deviceElements.slice(0,i)
-            console.log(this.deviceElements)
         }
         this.loadedWithError(null)
         return Promise.resolve()
     }
 
     updateWithAPI(){
-        return GetDevices().then((result)=>{this.update(result)})
+        return GetDevices().then((result)=>{this.update(result)}).catch(()=>this.loadedWithError("Failed to load data"))
     }
 
     connectedCallback(){
