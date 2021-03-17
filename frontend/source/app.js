@@ -42,11 +42,14 @@ class App extends HTMLElement {
             this.authElem.addEventListener("signedin",(e)=>{
                 this.app.innerHTML = this.appContent
                 this.header.dispatchEvent(new e.constructor(e.type, e));
-                this.app.style.removeProperty("display");this.login.style.display="none";}
-            )
+                this.app.style.removeProperty("display");
+                this.login.style.display="none";
+            })
             this.authElem.addEventListener("authrequired",()=>{
                 this.app.innerHTML = ""
-                this.app.style.display = "none";this.login.style.removeProperty("display")})
+                this.app.style.display = "none";
+                this.login.style.removeProperty("display")
+            })
 
             this.root.appendChild(this.appTemplate.content)
         }
