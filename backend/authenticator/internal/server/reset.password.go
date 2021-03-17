@@ -23,7 +23,11 @@ func (s *server) handleResetPassword(w http.ResponseWriter, r *http.Request, _ h
 			Username: aws.String(string(resetPassRequest.Email)),
 		})
 		if err != nil {
-			s.blocker.CheckBlock(string(resetPassRequest.Email))
+			err = s.blocker.CheckBlock(string(resetPassRequest.Email))
+			if err != nil {
+				w.WriteHeader(http.StatusTooManyRequests)
+				return
+			}
 			s.writeError(err, w)
 			return
 		}

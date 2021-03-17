@@ -42,6 +42,12 @@ func (s *service) handleCommand() http.HandlerFunc {
 			logger.Printf(logger.Error, "handleCommand: internal user id context is empty")
 			w.WriteHeader(http.StatusForbidden)
 			_, _ = w.Write([]byte("internal id auth failed"))
+			return
+		}
+		err := s.blocker.CheckBlock(internalUserID)
+		if err != nil {
+			w.WriteHeader(http.StatusTooManyRequests)
+			return
 		}
 		eventType := event.Type(r.Header.Get(event.TypeIdentifier))
 		body, err := ioutil.ReadAll(r.Body)
@@ -51,6 +57,7 @@ func (s *service) handleCommand() http.HandlerFunc {
 			return
 		}
 		logger.Printf(logger.Trace, "customer %s commanded %s with data: %s", internalUserID, eventType, string(body))
+		//TODO switch to event map
 		switch eventType {
 		case event.TypeAddDevice:
 			s.unmarshalAndSend(w, event.TypeAddDevice, &commander.AddDevice{}, internalUserID, body)

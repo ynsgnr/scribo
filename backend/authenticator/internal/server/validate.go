@@ -13,7 +13,11 @@ import (
 )
 
 func (s *server) handleValidate(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	accessToken := s.getAuthToken(r)
+	accessToken, err := s.getAuthToken(r)
+	if err != nil {
+		w.WriteHeader(http.StatusTooManyRequests)
+		return
+	}
 	if accessToken == "" {
 		s.writeError(&cognitoidentityprovider.NotAuthorizedException{}, w)
 		return
@@ -22,7 +26,11 @@ func (s *server) handleValidate(w http.ResponseWriter, r *http.Request, _ httpro
 		AccessToken: aws.String(string(accessToken)),
 	})
 	if err != nil || response.Username == nil {
-		s.blocker.CheckBlock(string(accessToken))
+		err = s.blocker.CheckBlock(string(accessToken))
+		if err != nil {
+			w.WriteHeader(http.StatusTooManyRequests)
+			return
+		}
 		s.writeError(&cognitoidentityprovider.NotAuthorizedException{}, w)
 		return
 	}
@@ -36,7 +44,7 @@ func (s *server) handleValidate(w http.ResponseWriter, r *http.Request, _ httpro
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (s *server) getAuthToken(r *http.Request) authenticator.Token {
+func (s *server) getAuthToken(r *http.Request) (authenticator.Token, error) {
 	token := r.Header.Get(authenticator.HttpAuthHeader)
 	authData := strings.Split(token, authenticator.HttpAuthType)
 	//Validate header
@@ -46,8 +54,8 @@ func (s *server) getAuthToken(r *http.Request) authenticator.Token {
 		if len(IPs) != 0 && len(IPs[0]) != 0 {
 			IP = IPs[0]
 		}
-		s.blocker.CheckBlock(IP)
-		return ""
+		err := s.blocker.CheckBlock(IP)
+		return "", err
 	}
-	return authenticator.Token(authData[1][1:])
+	return authenticator.Token(authData[1][1:]), nil
 }

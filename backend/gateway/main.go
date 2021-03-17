@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/ynsgnr/scribo/backend/authenticator/authenticator"
+	"github.com/ynsgnr/scribo/backend/common/blocker"
 	"github.com/ynsgnr/scribo/backend/common/logger"
 	"github.com/ynsgnr/scribo/backend/gateway/internal/authenticate"
 	"github.com/ynsgnr/scribo/backend/gateway/internal/commander"
@@ -40,7 +41,8 @@ func main() {
 	commander := commander.NewKafkaCommander(p, cfg.CommandTopic)
 	authenticator := authenticator.NewAuthenticatorSDK("http://authenticator", http.DefaultClient)
 	authorizer := authenticate.NewAuthorizerMiddleware(authenticator)
-	s := service.NewService(commander, authorizer, cfg.CrossOriginAllow, cfg.CrossOriginAllowCredentials, cfg.CrossOriginAllowMethods, cfg.CrossOriginAllowHeaders, cfg.CrossOriginExposeHeaders)
+	eventBlocker := blocker.NewBlocker(cfg.BlockerPeriod, cfg.BlockerCleanupPeriod, cfg.BlockerMaxWait, int64(cfg.BlockerThrottleAfterTries))
+	s := service.NewService(commander, authorizer, eventBlocker, cfg.CrossOriginAllow, cfg.CrossOriginAllowCredentials, cfg.CrossOriginAllowMethods, cfg.CrossOriginAllowHeaders, cfg.CrossOriginExposeHeaders)
 	OnShutDown(func() { s.Shutdown(time.Second) })
 	s.Run()
 	//Wait for error logs to send

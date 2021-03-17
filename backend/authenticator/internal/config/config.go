@@ -15,6 +15,7 @@ type Config struct {
 	BlockerPeriod             time.Duration `env:"BLOCKER_PERIOD" default:"100ms"`
 	BlockerCleanupPeriod      time.Duration `env:"BLOCKER_PERIOD" default:"20s"`
 	BlockerThrottleAfterTries int           `env:"BLOCKER_THROTTLE_AFTER" default:"5"`
+	BlockerMaxWait            time.Duration `env:"BLOCKER_MAX_WAIT" default:"5s"`
 }
 
 func InitConfig() (Config, error) {

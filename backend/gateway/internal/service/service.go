@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/ynsgnr/scribo/backend/common/blocker"
 	"github.com/ynsgnr/scribo/backend/common/logger"
 	"github.com/ynsgnr/scribo/backend/gateway/internal/authenticate"
 	"github.com/ynsgnr/scribo/backend/gateway/internal/commander"
@@ -15,7 +16,7 @@ type Interface interface {
 	Shutdown(time.Duration)
 }
 
-func NewService(commander commander.Interface, authorizer *authenticate.UserAuthenticator,
+func NewService(commander commander.Interface, authorizer *authenticate.UserAuthenticator, blocker blocker.Blocker,
 	crossOriginAllow string,
 	crossOriginAllowCredentials string,
 	crossOriginAllowMethods string,
@@ -25,6 +26,7 @@ func NewService(commander commander.Interface, authorizer *authenticate.UserAuth
 		commander:                   commander,
 		authorizer:                  authorizer,
 		filter:                      FilterTransport{},
+		blocker:                     blocker,
 		crossOriginAllow:            crossOriginAllow,
 		crossOriginAllowCredentials: crossOriginAllowCredentials,
 		crossOriginAllowHeaders:     crossOriginAllowHeaders,
@@ -37,6 +39,7 @@ type service struct {
 	commander  commander.Interface
 	authorizer *authenticate.UserAuthenticator
 	filter     http.RoundTripper
+	blocker    blocker.Blocker
 
 	crossOriginAllow            string
 	crossOriginAllowCredentials string

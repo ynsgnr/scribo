@@ -19,7 +19,11 @@ func (s *server) handleVerification(w http.ResponseWriter, r *http.Request, _ ht
 		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
-	accessToken := s.getAuthToken(r)
+	accessToken, err := s.getAuthToken(r)
+	if err != nil {
+		w.WriteHeader(http.StatusTooManyRequests)
+		return
+	}
 	_, err = s.cognito.VerifyUserAttribute(&cognitoidentityprovider.VerifyUserAttributeInput{
 		AccessToken:   aws.String(string(accessToken)),
 		AttributeName: aws.String("email"),
@@ -34,8 +38,12 @@ func (s *server) handleVerification(w http.ResponseWriter, r *http.Request, _ ht
 }
 
 func (s *server) handleSendVerificationEmail(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	accessToken := s.getAuthToken(r)
-	_, err := s.cognito.GetUserAttributeVerificationCode(&cognitoidentityprovider.GetUserAttributeVerificationCodeInput{
+	accessToken, err := s.getAuthToken(r)
+	if err != nil {
+		w.WriteHeader(http.StatusTooManyRequests)
+		return
+	}
+	_, err = s.cognito.GetUserAttributeVerificationCode(&cognitoidentityprovider.GetUserAttributeVerificationCodeInput{
 		AccessToken:   aws.String(string(accessToken)),
 		AttributeName: aws.String("email"),
 	})

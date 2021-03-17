@@ -21,7 +21,11 @@ func (s *server) handleSignIn(w http.ResponseWriter, r *http.Request, _ httprout
 	}
 	result, err := s.signIn(signInRequest.Base)
 	if err != nil {
-		s.blocker.CheckBlock(string(signInRequest.Email))
+		err = s.blocker.CheckBlock(string(signInRequest.Email))
+		if err != nil {
+			w.WriteHeader(http.StatusTooManyRequests)
+			return
+		}
 		s.writeError(err, w)
 		return
 	}
