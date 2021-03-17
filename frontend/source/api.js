@@ -7,6 +7,8 @@ const getDevicesEndpoint = Baseurl+"/sync-device/v1/user/:userID/devices"
 
 const userIDKey = ":userID"
 
+class RateLimitException extends Error {}
+
 export function GetDevices(){
     return get(getDevicesEndpoint)
 }
@@ -35,8 +37,11 @@ function sendEvent(eventType,body){
         },
         body:body
         }).then(response=>{
+            if (response.status == 429) {
+                throw new RateLimitException()
+            }
             if (response.status != 200){
-                throw "Can't send commands"
+                throw new Error()
             }
             return Promise.resolve()
         })
@@ -54,7 +59,7 @@ function get(url){
             'Authorization': 'Bearer '+ cookie.getCookie(auth.AccessTokenKey),
         }}).then(response=>{
             if (response.status != 200){
-                throw "Can't get resources right now"
+                throw new Error()
             }
             return response.json()
         })
