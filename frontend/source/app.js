@@ -2,7 +2,6 @@ import './auth.js'
 import './footer.js'
 import './device.js'
 import './header.js'
-import './file.js'
 
 import * as cookie from './cookie.js'
 import { UserIDKey, UserKey } from './auth.js'

@@ -1,8 +1,16 @@
 import {GetDevices} from './api.js'
+import {Upload} from './api.file.upload.js'
 
 import './device.add.js'
 import {Popup} from './basic.popup.js'
 import './device.element.js'
+
+function dragOverHandler(ev) {
+    console.log('File(s) in drop zone'); 
+  
+    // Prevent default behavior (Prevent file from being opened)
+    ev.preventDefault();
+}
 
 class ScriboDevice extends HTMLElement {
     constructor() {
@@ -24,11 +32,14 @@ class ScriboDevice extends HTMLElement {
                             + Add a device
                         </button>
                     </div>
-                    <div style = "flex:5;">
+                    <div id="device-details" style = "flex:5;">
                         <p>Previous Syncs</p>
-                        <div id="prevsyncs">
+                        <div id="prev-syncs">
                         </div>
-                        <p style="color:gray;">Drag and drop file to send</p>
+                        <input type="file" id="upload" hidden/>
+                        <label for="upload" style="color:gray;">
+                            Drag and drop file or click here to send new file
+                        </label>
                     </div>
                 </div>
             </div>
@@ -40,6 +51,32 @@ class ScriboDevice extends HTMLElement {
         this.content = root.getElementById("content")
         this.deviceList = root.getElementById("device-list")
         this.addDeviceButton = root.getElementById("add-device")
+        this.prevSyncs = root.getElementById("prev-syncs")
+
+        this.manualUpload = root.getElementById("upload")
+        this.manualUpload.onchange = ()=>this.fileUpload(this.manualUpload.files)
+
+        this.deviceDetails = root.getElementById("device-details")
+        this.deviceDetails.addEventListener("dragenter",(e)=>{
+            e.preventDefault()
+            e.stopPropagation()
+            this.deviceDetails.style.background = "#cecece"
+        });
+        this.deviceDetails.addEventListener("dragleave", (e)=>{
+            e.preventDefault()
+            e.stopPropagation()
+            this.deviceDetails.style.removeProperty("background")
+        });
+        this.deviceDetails.addEventListener("dragover", (e)=>{
+            e.preventDefault()
+            e.stopPropagation()
+        });
+        this.deviceDetails.addEventListener("drop", (e)=>{
+            e.preventDefault()
+            e.stopPropagation()
+            this.deviceDetails.style.removeProperty("background")
+            this.fileUpload(e.dataTransfer.files)
+        });
 
         this.deviceAdd = document.createElement("device-add") //singleton
         this.addDeviceButton.onclick = ()=>{this.popup = Popup(this.shadowRoot,this.deviceAdd)}
@@ -50,6 +87,13 @@ class ScriboDevice extends HTMLElement {
         let shadowRoot = this.attachShadow({ mode: "open" });
         shadowRoot.appendChild(root);
         this.addEventListener("signedin",()=>{this.signOutButton.style.removeProperty("display")})
+    }
+
+    fileUpload(file){
+        Upload(file).then(
+            ()=>{console.log("success")},
+            ()=>{console.log("fail")},
+        )
     }
 
     loadedWithError(error){
@@ -92,8 +136,8 @@ class ScriboDevice extends HTMLElement {
                 deviceElement.setAttribute("id",data[i].deviceID)
                 deviceElement.setAttribute("name",data[i].deviceName)
                 deviceElement.setAttribute("type",data[i].deviceType)
+                deviceElement.onclick = (event)=>{this.elementOnclick(event.target)}
                 this.deviceElements.push(deviceElement)
-                this.deviceElements[i].onclick = (event)=>{this.elementOnclick(event.target)}
                 this.deviceList.appendChild(deviceElement)
             }
         }
