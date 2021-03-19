@@ -22,7 +22,10 @@ export function AddDevice(deviceName, type, data){
 }
 
 export function SyncRequest(deviceID, fileLocation){
-
+    return sendEvent("Send2Device", JSON.stringify({
+        deviceID: deviceID,
+        fileLocation: fileLocation
+    }))
 }
 
 function sendEvent(eventType,body){

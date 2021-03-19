@@ -1,4 +1,4 @@
-import {GetDevices} from './api.js'
+import {GetDevices,SyncRequest} from './api.js'
 import {Upload} from './api.file.upload.js'
 
 import {Popup} from './basic.popup.js'
@@ -27,12 +27,14 @@ class ScriboDevice extends HTMLElement {
                             + Add a device
                         </button>
                     </div>
-                    <file-upload id="device-details" style = "flex:5;">
-                        <p slot="top">Previous Syncs</p>
-                        <div slot="bottom" id="prev-syncs">
-                            <br>
-                        </div>
-                    </file-upload>
+                    <div style="flex:5;">
+                        <file-upload id="device-details" style="display:none;">
+                            <p slot="top">Previous Syncs</p>
+                            <div slot="bottom" id="prev-syncs">
+                                <br>
+                            </div>
+                        </file-upload>
+                    </div>
                 </div>
             </div>
         </div>
@@ -45,8 +47,8 @@ class ScriboDevice extends HTMLElement {
         this.addDeviceButton = root.getElementById("add-device")
         this.prevSyncs = root.getElementById("prev-syncs")
 
-        this.deviceElements = root.getElementById("device-details")
-        this.deviceElements.addEventListener("filedrop",(e)=>{this.fileUpload(e.detail)})
+        this.deviceDetails = root.getElementById("device-details")
+        this.deviceDetails.addEventListener("filedrop",(e)=>{this.sendFile(e.detail)})
 
         this.deviceAdd = document.createElement("device-add") //singleton
         this.addDeviceButton.onclick = ()=>{this.popup = Popup(this.shadowRoot,this.deviceAdd)}
@@ -59,12 +61,16 @@ class ScriboDevice extends HTMLElement {
         this.addEventListener("signedin",()=>{this.signOutButton.style.removeProperty("display")})
     }
 
-    fileUpload(file){
-        console.log(file)
-        Upload(file).then(
-            ()=>{console.log("success")},
-            ()=>{console.log("fail")},
-        )
+    sendFile(file){
+        var id = this.selectedDevice.getAttribute("id")
+        if (id && id != ""){
+            Upload(file).then((fileLocation)=>{
+                    console.log(fileLocation)
+                    SyncRequest(id,fileLocation)
+                },
+                ()=>{console.log("fail")},
+            )
+        }
     }
 
     loadedWithError(error){
@@ -87,10 +93,12 @@ class ScriboDevice extends HTMLElement {
             }
             element.setAttribute("selected","true")
             this.selectedDevice = element
+            this.deviceDetails.style.removeProperty("display")
         }
     }
 
     update(data){
+        console.log(data)
         if (!data){
             this.loadedWithError("Failed to load data")
             return Promise.resolve()

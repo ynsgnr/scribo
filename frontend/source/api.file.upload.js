@@ -35,5 +35,5 @@ export function Upload(files){
       ACL: "private"
     }
   })
-  return upload.promise()
+  return upload.promise().then(()=>{return encodeURI("https://"+awsS3bucketName+".s3."+awsS3bucketRegion+".amazonaws.com/"+fileKey)})
 }
