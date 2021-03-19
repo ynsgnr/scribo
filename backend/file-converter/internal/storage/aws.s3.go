@@ -1,14 +1,17 @@
 package storage
 
 import (
+	"fmt"
 	"io"
 	"net/url"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/ynsgnr/scribo/backend/common/logger"
 )
 
 // Creates a new storage object based on S3
@@ -29,12 +32,18 @@ type storageS3 struct {
 }
 
 func (storage *storageS3) DownloadFile(location string) (string, error) {
-	key, err := url.QueryUnescape(path.Base(location))
+	urlSplit := strings.Split(location, "amazonaws.com/")
+	if len(urlSplit) != 2 {
+		return "", fmt.Errorf("wrong url format: %s", location)
+	}
+	key, err := url.QueryUnescape(urlSplit[1])
 	if err != nil {
 		return "", err
 	}
+	logger.Printf(logger.Trace, "downloading with %s from location %s", key, location)
 	filePath := path.Join(storage.tmp, key)
-	err = os.Mkdir(storage.tmp, os.ModeDir)
+	dir, _ := path.Split(filePath)
+	err = os.MkdirAll(dir, os.ModeDir)
 	if err != nil && !os.IsExist(err) {
 		return "", err
 	}
