@@ -1,18 +1,18 @@
 class FileUpload extends HTMLElement {
 
-    static get observedAttributes() { return ['disabletop','disablebottom','disablehint']; }
+    static get observedAttributes() { return ['topstyle','bottomstyle','hintstyle']; }
 
     constructor() {
         super();
         let template = document.createElement("template")
         template.innerHTML = `
         <div id="drop-zone">
-            <slot id="top-slot">TOP</slot>
+            <slot name="top" id="top-slot">TOP</slot>
             <input type="file" id="upload" hidden/>
             <label id="upload-hint" for="upload" style="color:gray;">
                 Drag and drop file or click here to send new file
             </label>
-            <slot id="bottom-slot">BOTTOM</slot>
+            <slot name="bottom" id="bottom-slot">BOTTOM</slot>
         </div>
         `
         let root = template.content
@@ -59,26 +59,14 @@ class FileUpload extends HTMLElement {
 
     attributeChangedCallback(name, oldValue, newValue) {
         switch (name){
-            case "disabletop":
-                if (newValue || newValue=="true"){
-                    this.topSlot.style.display = "none"
-                }else{
-                    this.topSlot.style.removeProperty("display")
-                }
+            case "topstyle":
+                this.topSlot.style = newValue
                 break
-            case "disablebottom":
-                if (newValue || newValue=="true"){
-                    this.bottomSlot.style.display = "none"
-                }else{
-                    this.bottomSlot.style.removeProperty("display")
-                }
+            case "bottomstyle":
+                this.bottomSlot.style = newValue
                 break
-            case "disablehint":
-                if (newValue || newValue=="true"){
-                    this.manualUploadHint.style.display = "none"
-                }else{
-                    this.manualUploadHint.style.removeProperty("display")
-                }
+            case "hintstyle":
+                this.manualUploadHint.style = newValue
                 break
 
         }

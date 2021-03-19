@@ -28,8 +28,9 @@ class ScriboDevice extends HTMLElement {
                         </button>
                     </div>
                     <file-upload id="device-details" style = "flex:5;">
-                        <p>Previous Syncs</p>
-                        <div id="prev-syncs">
+                        <p slot="top">Previous Syncs</p>
+                        <div slot="bottom" id="prev-syncs">
+                            <br>
                         </div>
                     </file-upload>
                 </div>
