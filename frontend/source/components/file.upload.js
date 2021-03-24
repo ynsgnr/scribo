@@ -40,7 +40,6 @@ class FileUpload extends HTMLElement {
             e.preventDefault()
             e.stopPropagation()
             this.dropZone.style.removeProperty("background")
-            console.log(e.dataTransfer)
             this.fileUpload(e.dataTransfer.files)
         });
 
@@ -52,8 +51,8 @@ class FileUpload extends HTMLElement {
         shadowRoot.appendChild(root)
     }
 
-    fileUpload(files){
-        this.dispatchEvent(new CustomEvent("filedrop",{composed: true, detail:files}))
+    fileUpload(files){ 
+        this.dispatchEvent(new CustomEvent("filedrop",{composed: true, detail:{files:files}}))
         this.manualUpload.value = null
     }
 

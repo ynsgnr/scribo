@@ -1,4 +1,4 @@
-import {AddDevice} from './api.js'
+import {AddDevice} from './api/api.js'
 
 //TODO make this part data oriented (get required data from backend and render form accordingly by device type)
 class DeviceAdd extends HTMLElement {

@@ -1,10 +1,10 @@
-import './auth.js'
-import './footer.js'
+import './api/auth.js'
+import './components/footer.js'
 import './device.js'
-import './header.js'
+import './components/header.js'
 
-import * as cookie from './cookie.js'
-import { UserIDKey, UserKey } from './auth.js'
+import * as cookie from './api/cookie.js'
+import { UserIDKey, UserKey } from './api/auth.js'
 
 class App extends HTMLElement {
         constructor() {
