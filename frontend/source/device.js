@@ -2,6 +2,7 @@ import {GetDevices,SyncRequest} from './api/api.js'
 import {Upload} from './api/file.upload.js'
 
 import {Popup} from './components/basic.popup.js'
+import {Toast} from './components/basic.toast.js'
 import './components/file.upload.js'
 import './components/list.recycle.js'
 import './components/loading.placeholder.js'
@@ -81,16 +82,14 @@ class ScriboDevice extends HTMLElement {
     }
 
     update(data){
-        console.log(data)
         if (!data){
             this.loading.setAttribute("loaded","true")
-            //this.loadedWithError("Failed to load data")
+            Toast(this.shadowRoot,"Failed to load data")
             return Promise.resolve()
         }
         data.sort( (a,b)=> a.deviceName<b.deviceName ? -1 : a.deviceName>b.deviceName ? 1 : 0);
         this.deviceList.items = data    
         this.loading.setAttribute("loaded","true")
-        //this.loadedWithError(null)
         return Promise.resolve()
     }
 
