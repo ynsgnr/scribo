@@ -9,6 +9,7 @@ import './components/loading.placeholder.js'
 
 import './device.add.js'
 import './device.element.js'
+import './device.sync.element.js'
 
 class ScriboDevice extends HTMLElement {
     constructor() {
@@ -20,8 +21,9 @@ class ScriboDevice extends HTMLElement {
                 <div slot="content" id="content">
                     <div style = "display:flex; margin: 0 auto; text-align: center; overflow:auto; height:100%;">
                         <div style = "flex:1;">
-                            <p>Devices</p>
-                            <recycle-list style = "text-align: left; padding:5%;" id="device-list"></recycle-list>
+                            <recycle-list style = "text-align: left; padding:5%;" id="device-list">
+                                <p style="flex: 1; text-align: center;">Devices</p>
+                            </recycle-list>
                             <button class="add-device" type="button" id="add-device">
                                 + Add a device
                             </button>
@@ -30,7 +32,7 @@ class ScriboDevice extends HTMLElement {
                             <file-upload id="device-details" style="display:none;">
                                 <p slot="top">Previous Syncs</p>
                                 <recycle-list slot="bottom" id="prev-syncs">
-                                    <br>
+                                    <device-sync-element filelocation="File Name" syncstate="Status"></device-sync-element>
                                 </recycle-list>
                             </file-upload>
                         </div>
@@ -43,7 +45,9 @@ class ScriboDevice extends HTMLElement {
         this.loading = root.getElementById("loading-display")
         this.content = root.getElementById("content")
         this.addDeviceButton = root.getElementById("add-device")
+
         this.prevSyncs = root.getElementById("prev-syncs")
+        this.prevSyncs.base = document.createElement("device-sync-element")
 
         this.deviceDetails = root.getElementById("device-details")
         this.deviceDetails.addEventListener("filedrop",(e)=>{this.sendFile(e.detail.files)})
@@ -66,7 +70,6 @@ class ScriboDevice extends HTMLElement {
             var id = this.selectedDevice.getAttribute("deviceid")
             if (id != ""){
                 Upload(file).then((fileLocation)=>{
-                        console.log(fileLocation)
                         SyncRequest(id,fileLocation)
                         this.updateWithAPI()
                     },
@@ -78,7 +81,10 @@ class ScriboDevice extends HTMLElement {
 
     itemSelect(element){
         this.selectedDevice = element
-        this.deviceDetails.style.removeProperty("display")
+        if (element.data){
+            this.deviceDetails.style.removeProperty("display")
+            this.prevSyncs.items = element.data.send
+        }
     }
 
     update(data){

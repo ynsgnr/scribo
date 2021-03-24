@@ -5,6 +5,7 @@ class RecycleList extends HTMLElement {
         let template = document.createElement("template")
         template.innerHTML = `
         <div id="list">
+            <slot></slot>
         </div>
         `
         this._elements = [];
@@ -28,18 +29,36 @@ class RecycleList extends HTMLElement {
      * @param {any[]} data
      */
     set items(data) {
+        let objectData
+        if(!Array.isArray(data)){
+            if (typeof data === 'object'){
+                objectData = data
+                data = Object.keys(objectData)
+            }else{
+                throw "Unexpected input"
+            }
+        }
         for (var i=0;i<data.length;i++){
+            var obj = data[i]
+            if (typeof data[i] !== 'object'){
+                //assume its the key
+                obj = objectData[data[i]]
+                if (!obj){
+                    throw "Unexpected input: missing key "+data[i]
+                }
+            }
             if (i>=this._elements.length){
                 let newElement = this.base.cloneNode(true)
                 this._elements.push(newElement)
                 this._list.appendChild(newElement)
             }
-            let keys = Object.keys(data[i])
+            let keys = Object.keys(obj)
             for (var j=0;j<keys.length;j++){
-                if (typeof data[i][keys[j]]==='number' || typeof data[i][keys[j]]==='string'){
-                    this._elements[i].setAttribute(keys[j],data[i][keys[j]])
+                if (typeof obj[keys[j]]==='number' || typeof obj[keys[j]]==='string'){
+                    this._elements[i].setAttribute(keys[j],obj[keys[j]])
                 }
             }
+            this._elements[i].data = obj
             this._elements[i].onclick = (event)=>{this.elementOnclick(event.target)}
         }
         if (i<this._elements.length){

@@ -1,45 +1,33 @@
-class DeviceElement extends HTMLElement {
+class DeviceSyncElement extends HTMLElement {
 
-    static get observedAttributes() { return ['devicename', 'devicetype', 'selected']; }
+    static get observedAttributes() { return ['filelocation', 'syncstate']; }
 
     constructor() {
         super();
         let template = document.createElement("template")
         template.innerHTML = `
-        <div id="container" style="display:flex;">
-                <div style = "flex:1; margin: auto; text-align: center;">
-                    <img id="device-type-logo"/>
+        <div id="container" style="flex-direction: row; display: flex; margin-left:3%">
+                <div style="margin: 1%; text-align: left;">
+                    <p id="file-name"></p>
                 </div>
-                <div style = "flex:3;">
-                    <p id="device-name"></p>
+                <div style="margin: 1%; text-align: left;">
+                    <p id="status"></p>
                 </div>
         </div>
         `
         let root = template.content
-        this.deviceTypeLogo = root.getElementById("device-type-logo")
-        this.deviceName = root.getElementById("device-name")
-        this.container = root.getElementById("container")
+        this.status = root.getElementById("status")
+        this.fileName = root.getElementById("file-name")
         let shadowRoot = this.attachShadow({ mode: "open" });
         shadowRoot.appendChild(root);
-
-        this.deviceLogoMap = {
-            "kindle":"assets/kindle.svg"
-        }
     }
 
     update(){
-        this.deviceName.innerHTML = this.getAttribute("devicename")
-        var logo = this.deviceLogoMap[this.getAttribute("devicetype")]
-        if (logo){
-            this.deviceTypeLogo.setAttribute("src",logo)
+        var fileLink = this.getAttribute("filelocation")
+        if (fileLink){
+            this.fileName.innerHTML = fileLink.split("/").pop()
         }
-        if (this.getAttribute("selected")){
-            this.container.style.border = "1px solid #ccc"
-            this.container.style.boxShadow = "3px 3px 2px gray;"
-        }else{
-            this.container.style.removeProperty("boxShadow")
-            this.container.style.removeProperty("border")
-        }
+        this.status.innerHTML = this.getAttribute("syncstate")
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -52,4 +40,4 @@ class DeviceElement extends HTMLElement {
         this.update()
     }
 }
-window.customElements.define("device-element", DeviceElement);
+window.customElements.define("device-sync-element", DeviceSyncElement);
