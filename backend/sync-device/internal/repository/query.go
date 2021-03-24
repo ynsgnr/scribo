@@ -14,9 +14,10 @@ type DeviceQueryResult struct {
 }
 
 type SendQueryResult struct {
-	SyncID   string `json:"syncID"`
-	DeviceID string `json:"deviceID"`
-	State    State  `json:"syncState"`
+	SyncID       string `json:"syncID"`
+	DeviceID     string `json:"deviceID"`
+	FileLocation string `json:"fileLocation"`
+	State        State  `json:"syncState"`
 }
 
 type DeviceType int32
